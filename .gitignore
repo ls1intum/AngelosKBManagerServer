@@ -1,6 +1,7 @@
 .env
 
 uploads/
+docker/postgres/postgres.env
 
 HELP.md
 target/
