@@ -1,5 +1,8 @@
 package com.ase.angelos_kb_backend.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 
 import com.ase.angelos_kb_backend.dto.OrganisationDTO;
@@ -37,6 +40,14 @@ public class OrganisationService {
             throw new ResourceNotFoundException("Organisation not found with id " + orgId);
         }
     }
+
+    public List<OrganisationDTO> getAllOrganisations() {
+        List<Organisation> organisations = organisationRepository.findAll();
+        return organisations.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+         
 
     private OrganisationDTO convertToDto(Organisation organisation) {
         OrganisationDTO dto = new OrganisationDTO();

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,9 @@ public class UserService {
     private final OrganisationService organisationService;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+
+    @Value("${server.port}")
+    private int serverPort;
 
     public UserService(UserRepository userRepository, OrganisationService organisationService, PasswordEncoder passwordEncoder, EmailService emailService) {
         this.userRepository = userRepository;
@@ -102,7 +106,8 @@ public class UserService {
 
     private void sendConfirmationEmail(User user) {
         String token = user.getConfirmationToken();
-        String confirmationUrl = "http://TODO.com/api/users/confirm?token=" + token;
+
+        String confirmationUrl = "http://localhost:" + serverPort + "/api/users/confirm?token=" + token;
         String subject = "Email Confirmation";
         String message = "Please click the link below to confirm your email:\n" + confirmationUrl;
     

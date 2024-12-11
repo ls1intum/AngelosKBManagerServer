@@ -69,8 +69,6 @@ public class AngelosService {
         return sendPostRequest(endpoint, body);
     }
 
-    
-
     /**
      * Send a request to delete a website from Angelos.
      */
@@ -149,7 +147,7 @@ public class AngelosService {
         body.setAnswer(sampleQuestion.getAnswer());
         body.setStudyPrograms(sampleQuestion.getStudyPrograms().stream().map(sp -> sp.getId()).toList());
 
-        String endpoint = angelosUrl + "/sample-question/edit";
+        String endpoint = angelosUrl + "/sample-question/" + sampleQuestion.getId() + "/edit";
         return sendPostRequest(endpoint, body);
     }
 

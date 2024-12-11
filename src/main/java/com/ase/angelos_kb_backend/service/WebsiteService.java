@@ -161,6 +161,7 @@ public class WebsiteService {
         dto.setId(websiteContent.getId());
         dto.setTitle(websiteContent.getTitle());
         dto.setLink(websiteContent.getLink());
+        dto.setLastUpdated(websiteContent.getUpdatedAt());
 
         // Map study programs to DTOs (assuming StudyProgramDTO and conversion exist)
         List<StudyProgramDTO> studyProgramDTOs = websiteContent.getStudyPrograms().stream()

@@ -18,7 +18,6 @@ public class EmailService {
         email.setTo(toEmail);
         email.setSubject(subject);
         email.setText(message);
-        email.setFrom("noreply@yourdomain.com");
         mailSender.send(email);
     }
 }

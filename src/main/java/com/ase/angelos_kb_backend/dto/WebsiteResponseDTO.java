@@ -1,4 +1,5 @@
 package com.ase.angelos_kb_backend.dto;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -18,5 +19,6 @@ public class WebsiteResponseDTO {
     private Long id;
     private String title;
     private String link;
+    private LocalDateTime lastUpdated;
     private List<StudyProgramDTO> studyPrograms;
 }

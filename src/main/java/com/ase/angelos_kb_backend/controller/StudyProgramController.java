@@ -1,5 +1,6 @@
 package com.ase.angelos_kb_backend.controller;
 
+import com.ase.angelos_kb_backend.dto.StudyProgramDTO;
 import com.ase.angelos_kb_backend.model.StudyProgram;
 import com.ase.angelos_kb_backend.service.StudyProgramService;
 import com.ase.angelos_kb_backend.util.JwtUtil;
@@ -25,9 +26,9 @@ public class StudyProgramController {
      * Get all study programs by organisation ID extracted from JWT token.
      */
     @GetMapping
-    public ResponseEntity<List<StudyProgram>> getAllStudyPrograms(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<List<StudyProgramDTO>> getAllStudyPrograms(@RequestHeader("Authorization") String token) {
         Long orgId = jwtUtil.extractOrgId(token.replace("Bearer ", ""));
-        List<StudyProgram> studyPrograms = studyProgramService.getAllStudyProgramsByOrgId(orgId);
+        List<StudyProgramDTO> studyPrograms = studyProgramService.getAllStudyProgramsByOrgId(orgId);
         return ResponseEntity.ok(studyPrograms);
     }
 

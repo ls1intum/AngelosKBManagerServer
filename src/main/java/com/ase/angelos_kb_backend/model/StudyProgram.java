@@ -15,7 +15,7 @@ import lombok.Data;
 public class StudyProgram {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long spID;
 
     private String name;

@@ -44,6 +44,9 @@ public class SecurityConfig {
                     "/api/users/login",
                     "/api/users/register",
                     "/api/users/confirm",
+                    "/api/users/refresh",
+                    "/api/users/logout",
+                    "/api/organisations",
                     "/v3/api-docs/**",
                     "/swagger-ui/**",
                     "/docs/**",
@@ -78,11 +81,12 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
+        // Use the actual frontend URL
         configuration.addAllowedOrigin(allowedOrigin);
+        configuration.setAllowCredentials(true);
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
         configuration.addExposedHeader("Authorization");
-        configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

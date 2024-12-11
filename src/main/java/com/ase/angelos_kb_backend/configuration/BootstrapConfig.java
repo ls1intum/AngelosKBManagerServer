@@ -49,6 +49,7 @@ public class BootstrapConfig {
             admin.setPassword(passwordEncoder.encode(defaultAdminPassword)); // Use encoded password
             admin.setAdmin(true);
             admin.setApproved(true);
+            admin.setSystemAdmin(true);
             admin.setMailConfirmed(true);
             admin.setOrganisation(systemOrg); // Assign the "System Organisation"
             userRepository.save(admin);

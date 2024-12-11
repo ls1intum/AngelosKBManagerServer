@@ -18,7 +18,7 @@ import lombok.Data;
 public class Organisation {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long orgID;
 
     private String name;

@@ -3,6 +3,10 @@ package com.ase.angelos_kb_backend.controller;
 import com.ase.angelos_kb_backend.dto.OrganisationDTO;
 import com.ase.angelos_kb_backend.service.OrganisationService;
 import com.ase.angelos_kb_backend.util.JwtUtil;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,14 +24,29 @@ public class OrganisationController {
     }
 
     /**
+     * Get all organisations.
+     * This endpoint is unprotected and returns all organisations except the System Organisation as a list of OrganisationDTOs.
+     */
+    @GetMapping
+    public ResponseEntity<List<OrganisationDTO>> getAllOrganisations() {
+        List<OrganisationDTO> organisations = organisationService.getAllOrganisations()
+            .stream()
+            .filter(org -> !"System Organisation".equals(org.getName()))
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(organisations);
+    }
+
+    /**
      * Add a new organisation. Only accessible by system admin.
      */
     @PostMapping
     public ResponseEntity<OrganisationDTO> addOrganisation(
             @RequestHeader("Authorization") String token,
             @RequestParam String name) {
+        System.out.println(token);
         // Verify system admin access
         if (!jwtUtil.extractIsSystemAdmin(token.replace("Bearer ", ""))) {
+            
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 

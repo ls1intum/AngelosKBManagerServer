@@ -22,7 +22,7 @@ import lombok.ToString;
 public class SampleQuestion {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long sqID;
 
     private String topic;
@@ -51,7 +51,9 @@ public class SampleQuestion {
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
+        createdAt = now;
+        updatedAt = now;
     }
 
     @PreUpdate
