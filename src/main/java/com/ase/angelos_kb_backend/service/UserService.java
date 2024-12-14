@@ -16,6 +16,8 @@ import com.ase.angelos_kb_backend.model.Organisation;
 import com.ase.angelos_kb_backend.model.User;
 import com.ase.angelos_kb_backend.repository.UserRepository;
 
+import jakarta.mail.MessagingException;
+
 
 @Service
 public class UserService {
@@ -25,8 +27,8 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
 
-    @Value("${server.port}")
-    private int serverPort;
+    @Value("${cors.allowed-origin}")
+    private String allowedOrigin;
 
     public UserService(UserRepository userRepository, OrganisationService organisationService, PasswordEncoder passwordEncoder, EmailService emailService) {
         this.userRepository = userRepository;
@@ -36,6 +38,11 @@ public class UserService {
     }
 
     public List<UserDTO> getAllUsersByOrgId(Long orgId) {
+        Organisation organisation = organisationService.getOrganisationById(orgId);
+        if ("System Organisation".equals(organisation.getName())) {
+            // Fetch all users if the organization is "System Organisation"
+            return userRepository.findAll().stream().map(this::convertToDto).collect(Collectors.toList());
+        }
         return userRepository.findByOrganisationOrgID(orgId).stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
@@ -43,9 +50,10 @@ public class UserService {
     public UserDTO approveUser(Long userId, Long orgId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id " + userId));
-        // Ensure the user belongs to the organisation
-        if (!user.getOrganisation().getOrgID().equals(orgId)) {
-            throw new UnauthorizedException("You are not authorized to edit this website.");
+        Organisation approverOrg = organisationService.getOrganisationById(orgId);
+        // Allow operation if the approver's organisation is "System Organisation" or matches the user's organisation
+        if (!user.getOrganisation().getOrgID().equals(orgId) && !"System Organisation".equals(approverOrg.getName())) {
+            throw new UnauthorizedException("You are not authorized to approve this user.");
         }
         user.setApproved(true);
         return convertToDto(userRepository.save(user));
@@ -56,10 +64,13 @@ public class UserService {
     public UserDTO setUserToAdmin(Long userId, Long orgId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id " + userId));
-        // Ensure the user belongs to the organisation
-        if (!user.getOrganisation().getOrgID().equals(orgId)) {
-            throw new UnauthorizedException("You are not authorized to edit this website.");
+        
+        Organisation approverOrg = organisationService.getOrganisationById(orgId);
+        // Allow operation if the approver's organisation is "System Organisation" or matches the user's organisation
+        if (!user.getOrganisation().getOrgID().equals(orgId) && !"System Organisation".equals(approverOrg.getName())) {
+            throw new UnauthorizedException("You are not authorized to make this user an administrator.");
         }
+
         user.setAdmin(true);
         User updatedUser = userRepository.save(user);
         return convertToDto(updatedUser);
@@ -88,7 +99,11 @@ public class UserService {
         User savedUser = userRepository.save(newUser);
 
         // Send confirmation email
-        sendConfirmationEmail(savedUser);
+        try {
+            sendConfirmationEmail(savedUser);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send confirmation email. Registration aborted.", e);
+        }
 
         return convertToDto(savedUser);
     }
@@ -104,15 +119,14 @@ public class UserService {
         return true;
     }
 
-    private void sendConfirmationEmail(User user) {
+    private void sendConfirmationEmail(User user) throws MessagingException {
         String token = user.getConfirmationToken();
 
-        String confirmationUrl = "http://localhost:" + serverPort + "/api/users/confirm?token=" + token;
+        String confirmationUrl = allowedOrigin + "/confirm?token=" + token;
         String subject = "Email Confirmation";
-        String message = "Please click the link below to confirm your email:\n" + confirmationUrl;
     
         // Implement your email sending logic here
-        emailService.sendEmail(user.getMail(), subject, message);
+        emailService.sendEmail(user.getMail(), subject, confirmationUrl);
     }
 
     private UserDTO convertToDto(User user) {

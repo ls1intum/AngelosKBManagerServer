@@ -19,13 +19,22 @@ import com.ase.angelos_kb_backend.repository.StudyProgramRepository;
 public class StudyProgramService {
     private final StudyProgramRepository studyProgramRepository;
     private final OrganisationRepository organisationRepository;
+    private final OrganisationService organisationService;
 
-    public StudyProgramService(StudyProgramRepository studyProgramRepository, OrganisationRepository organisationRepository) {
+    public StudyProgramService(StudyProgramRepository studyProgramRepository, OrganisationRepository organisationRepository, OrganisationService organisationService) {
         this.studyProgramRepository = studyProgramRepository;
         this.organisationRepository = organisationRepository;
+        this.organisationService = organisationService;
     }
 
     public List<StudyProgramDTO> getAllStudyProgramsByOrgId(Long orgId) {
+        // Check if the organization is "System Organisation"
+        Organisation organisation = organisationService.getOrganisationById(orgId);
+        if ("System Organisation".equals(organisation.getName())) {
+            // Fetch all study programs if the organization is "System Organisation"
+            return studyProgramRepository.findAll().stream().map(this::convertToDto).collect(Collectors.toList());
+        }
+        // Otherwise, filter by organization ID
         return studyProgramRepository.findByOrganisationsOrgID(orgId).stream().map(this::convertToDto).collect(Collectors.toList());
     }
 

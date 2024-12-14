@@ -109,9 +109,9 @@ public class UserController {
         // The response may contain the access token in the body and the refresh token as a cookie
         HttpCookie refreshCookie = ResponseCookie.from("refreshToken", tokens.get("refreshToken"))
             .httpOnly(true)
-            //.secure(true) TODO: Add this in prod
-            .sameSite("None") // For cross-site requests, None is required when sending cookies
-            .path("/refresh") 
+            .secure(false) // TODO: Change this when deployed
+            .sameSite("Lax") // For cross-site requests, None is required when sending cookies
+            .path("/api/users")
             .maxAge(7 * 24 * 60 * 60) // Refresh token expiry, say one week
             .build();
 
@@ -123,7 +123,9 @@ public class UserController {
     @PostMapping("/refresh")
     public ResponseEntity<Map<String, String>> refreshAccessToken(
             @CookieValue(value = "refreshToken", required = false) String refreshToken) {
+        System.out.println("Refreshing token...");
         if (refreshToken == null || refreshToken.isEmpty()) {
+            System.out.println("Refreshing token failed...");
             return ResponseEntity.badRequest().body(Map.of("error", "Refresh token is required"));
         }
         try {
@@ -138,6 +140,7 @@ public class UserController {
             boolean isSystemAdmin = ((CustomUserDetails) userDetails).isSystemAdmin();
             String newAccessToken = jwtUtil.generateToken(email, orgId, isSystemAdmin);
 
+            System.out.println("Refreshing token success..");
             return ResponseEntity.ok(Map.of("accessToken", newAccessToken));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Invalid or expired refresh token"));

@@ -11,10 +11,13 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Data;
 
 @Entity
 @Data
+@Table(name = "organisations", uniqueConstraints = @UniqueConstraint(columnNames = "name"))
 public class Organisation {
 
     @Id
