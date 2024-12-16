@@ -33,7 +33,7 @@ public class AuthenticationService {
 
             if (!userDetails.isEnabled()) {
                 throw new RuntimeException("Login failed: Your account is not yet approved by an administrator.");
-            }    
+            }
 
             // Retrieve required parameters
             Long orgId = userDetails.getOrgId();

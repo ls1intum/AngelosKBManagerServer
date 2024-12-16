@@ -75,6 +75,7 @@ public class DocumentController {
     }
 
     
+    @SuppressWarnings("null")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
         summary = "Upload a PDF document",

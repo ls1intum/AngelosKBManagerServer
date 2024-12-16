@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -15,8 +16,11 @@ import javax.crypto.SecretKey;
 @Component
 public class JwtUtil {
 
-    private final String SECRET_KEY = "this_is_a_very_secure_and_long_secret_key_32_chars";
-    private final SecretKey signingKey = Keys.hmacShaKeyFor(SECRET_KEY.getBytes()); // Generate a SecretKey
+    private final SecretKey signingKey;
+
+    public JwtUtil(@Value("${jwt.secret.key}") String secretKey) {
+        this.signingKey = Keys.hmacShaKeyFor(secretKey.getBytes());
+    }
 
     // Generate JWT Token
     public String generateToken(String email, Long orgId, boolean isSystemAdmin) {

@@ -46,6 +46,12 @@ public class UserService {
         return userRepository.findByOrganisationOrgID(orgId).stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
+    public UserDTO findByMail(String mail) {
+        return userRepository.findByMail(mail)
+            .map(this::convertToDto) // Convert User to UserDTO if present
+            .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + mail));
+    }
+
     @Transactional
     public UserDTO approveUser(Long userId, Long orgId) {
         User user = userRepository.findById(userId)
@@ -79,7 +85,7 @@ public class UserService {
     @Transactional
     public UserDTO registerUser(String email, String password, Long orgId) {
         // Check if the email is already in use
-        if (userRepository.findByMail(email).isPresent()) {
+        if (userRepository.findByMail(email).isPresent() && userRepository.findByMail(email).get().isMailConfirmed()) {
             throw new ResourceNotFoundException("Email already in use");
         }
         Organisation organisation = organisationService.getOrganisationById(orgId);

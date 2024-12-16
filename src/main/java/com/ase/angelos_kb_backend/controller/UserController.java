@@ -53,6 +53,13 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<UserDTO> getCurrentUser(@RequestHeader("Authorization") String token) {
+        String email = jwtUtil.extractEmail(token.replace("Bearer ", ""));
+        UserDTO user = userService.findByMail(email);
+        return ResponseEntity.ok(user);
+    }
+
     /**
      * Approve a user by ID.
      */
@@ -123,7 +130,6 @@ public class UserController {
     @PostMapping("/refresh")
     public ResponseEntity<Map<String, String>> refreshAccessToken(
             @CookieValue(value = "refreshToken", required = false) String refreshToken) {
-        System.out.println("Refreshing token...");
         if (refreshToken == null || refreshToken.isEmpty()) {
             System.out.println("Refreshing token failed...");
             return ResponseEntity.badRequest().body(Map.of("error", "Refresh token is required"));

@@ -23,6 +23,10 @@ public class CustomUserDetails implements UserDetails {
         return user.isSystemAdmin();
     }
 
+    public boolean isAdmin() {
+        return user.isAdmin();
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         // Implement roles if needed
