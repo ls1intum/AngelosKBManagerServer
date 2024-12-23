@@ -43,10 +43,8 @@ public class OrganisationController {
     public ResponseEntity<OrganisationDTO> addOrganisation(
             @RequestHeader("Authorization") String token,
             @RequestParam String name) {
-        System.out.println(token);
         // Verify system admin access
         if (!jwtUtil.extractIsSystemAdmin(token.replace("Bearer ", ""))) {
-            
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 

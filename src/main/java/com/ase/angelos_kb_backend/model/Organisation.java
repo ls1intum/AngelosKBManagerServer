@@ -7,9 +7,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
@@ -29,12 +26,7 @@ public class Organisation {
     @OneToMany(mappedBy = "organisation", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<User> users;
 
-    @ManyToMany
-    @JoinTable(
-        name = "OrgaStudyPrograms",
-        joinColumns = @JoinColumn(name = "org_id"),
-        inverseJoinColumns = @JoinColumn(name = "sp_id")
-    )
+    @OneToMany(mappedBy = "organisation", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StudyProgram> studyPrograms;
 
     @OneToMany(mappedBy = "organisation", cascade = CascadeType.ALL, orphanRemoval = true)

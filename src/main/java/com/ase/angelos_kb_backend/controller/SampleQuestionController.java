@@ -1,6 +1,7 @@
 package com.ase.angelos_kb_backend.controller;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -60,7 +61,7 @@ public class SampleQuestionController {
     @PutMapping("/{sampleQuestionId}")
     public ResponseEntity<SampleQuestionDTO> editSampleQuestion(
             @RequestHeader("Authorization") String token,
-            @PathVariable Long sampleQuestionId,
+            @PathVariable UUID sampleQuestionId,
             @Valid @RequestBody SampleQuestionDTO sampleQuestionDTO) {
 
         Long orgId = jwtUtil.extractOrgId(token.replace("Bearer ", ""));
@@ -74,7 +75,7 @@ public class SampleQuestionController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSampleQuestion(
             @RequestHeader("Authorization") String token,
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
 
         Long orgId = jwtUtil.extractOrgId(token.replace("Bearer ", ""));
         sampleQuestionService.deleteSampleQuestion(id, orgId);

@@ -11,10 +11,11 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class AngelosAddWebsiteRequest {
-    private Long id;
+    private String id;
     private String title;
     private String link;
-    private List<Long> studyProgramIds;
+    private List<String> studyPrograms;
     private String content;
     private String type;
+    private Long orgId;
 }

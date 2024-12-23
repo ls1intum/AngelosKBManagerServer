@@ -16,7 +16,7 @@ import lombok.ToString;
 @Builder
 @ToString
 public class WebsiteResponseDTO {
-    private Long id;
+    private String id;
     private String title;
     private String link;
     private LocalDateTime lastUpdated;

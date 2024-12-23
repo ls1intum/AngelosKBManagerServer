@@ -14,5 +14,6 @@ public class AngelosEditSampleQuestionRequest {
     private String question;
     private String answer;
     private String topic;
-    private List<Long> studyPrograms;
+    private List<String> studyPrograms;
+    private Long orgId;
 }

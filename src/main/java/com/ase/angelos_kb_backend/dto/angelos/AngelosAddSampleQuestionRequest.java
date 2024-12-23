@@ -11,9 +11,10 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class AngelosAddSampleQuestionRequest {
-    private Long id;
+    private String id;
     private String question;
     private String answer;
     private String topic;
-    private List<Long> studyPrograms;
+    private List<String> studyPrograms;
+    private Long orgId;
 }

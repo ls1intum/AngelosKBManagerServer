@@ -2,6 +2,7 @@ package com.ase.angelos_kb_backend.model;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -22,8 +23,8 @@ import lombok.ToString;
 public class SampleQuestion {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private Long sqID;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID sqID;
 
     private String topic;
 

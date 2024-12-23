@@ -3,6 +3,7 @@ package com.ase.angelos_kb_backend.controller;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -66,7 +67,7 @@ public class DocumentController {
     @PutMapping("/{docId}")
     public ResponseEntity<DocumentDataDTO> editDocument(
             @RequestHeader("Authorization") String token,
-            @PathVariable Long docId,
+            @PathVariable UUID docId,
             @Valid @org.springframework.web.bind.annotation.RequestBody DocumentRequestDTO documentRequestDTO) {
 
         Long orgId = jwtUtil.extractOrgId(token.replace("Bearer ", ""));
@@ -116,7 +117,7 @@ public class DocumentController {
     @GetMapping("/{docId}/download")
     public ResponseEntity<Resource> downloadDocument(
             @RequestHeader("Authorization") String token,
-            @PathVariable Long docId) {
+            @PathVariable UUID docId) {
 
         Long orgId = jwtUtil.extractOrgId(token.replace("Bearer ", ""));
         DocumentContent document = documentService.getDocumentById(docId, orgId);
@@ -142,7 +143,7 @@ public class DocumentController {
     @DeleteMapping("/{docId}")
     public ResponseEntity<Void> deleteDocument(
             @RequestHeader("Authorization") String token,
-            @PathVariable Long docId) {
+            @PathVariable UUID docId) {
 
         Long orgId = jwtUtil.extractOrgId(token.replace("Bearer ", ""));
         documentService.deleteDocument(orgId, docId);

@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/websites")
@@ -58,7 +59,7 @@ public class WebsiteController {
     @PutMapping("/{websiteId}")
     public ResponseEntity<WebsiteResponseDTO> editWebsite(
             @RequestHeader("Authorization") String token,
-            @PathVariable Long websiteId,
+            @PathVariable UUID websiteId,
             @Valid @RequestBody WebsiteRequestDTO websiteRequestDTO) {
 
         Long orgId = jwtUtil.extractOrgId(token.replace("Bearer ", ""));
@@ -76,7 +77,7 @@ public class WebsiteController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteWebsite(
             @RequestHeader("Authorization") String token,
-            @PathVariable Long id) {
+            @PathVariable UUID id) {
 
         Long orgId = jwtUtil.extractOrgId(token.replace("Bearer ", ""));
         websiteService.deleteWebsite(id, orgId);

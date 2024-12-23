@@ -2,6 +2,7 @@ package com.ase.angelos_kb_backend.service;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -9,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ase.angelos_kb_backend.dto.SampleQuestionDTO;
 import com.ase.angelos_kb_backend.dto.StudyProgramDTO;
+import com.ase.angelos_kb_backend.dto.angelos.AngelosAddSampleQuestionRequest;
 import com.ase.angelos_kb_backend.exception.ResourceNotFoundException;
 import com.ase.angelos_kb_backend.exception.UnauthorizedException;
 import com.ase.angelos_kb_backend.model.Organisation;
@@ -37,7 +39,7 @@ public class SampleQuestionService {
         return sampleQuestionRepository.findByOrganisationOrgID(orgId).stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
-    public SampleQuestionDTO getSampleQuestionById(Long id) {
+    public SampleQuestionDTO getSampleQuestionById(UUID id) {
         SampleQuestion sampleQuestion = sampleQuestionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("SampleQuestion not found with id " + id));
         return this.convertToDto(sampleQuestion);
@@ -61,18 +63,78 @@ public class SampleQuestionService {
         );
         sampleQuestion.setStudyPrograms(studyPrograms);
 
-        boolean success = angelosService.sendSampleQuestionAddRequest(sampleQuestionDTO);
+        // Save to database
+        SampleQuestion savedSampleQuestion = sampleQuestionRepository.save(sampleQuestion);
+
+        sampleQuestionDTO.setId(savedSampleQuestion.getSqID().toString());
+
+        boolean success = angelosService.sendSampleQuestionAddRequest(sampleQuestionDTO, orgId);
         if (!success) {
             throw new RuntimeException("Failed to send add request to Angelos RAG system.");
         }
-        // Save to database
-        SampleQuestion savedSampleQuestion = sampleQuestionRepository.save(sampleQuestion);
 
         return convertToDto(savedSampleQuestion);
     }
 
     @Transactional
-    public SampleQuestionDTO editSampleQuestion(Long orgId, Long sampleQuestionId, SampleQuestionDTO sampleQuestionDTO) {
+    public List<SampleQuestionDTO> addSampleQuestions(Long orgId, List<SampleQuestionDTO> sampleQuestions) {
+        // Fetch Organisation
+        Organisation organisation = organisationService.getOrganisationById(orgId);
+
+        // Convert DTOs to Entities and Fetch Study Programs in one loop
+        List<SampleQuestion> entities = sampleQuestions.stream().map(dto -> {
+            SampleQuestion entity = new SampleQuestion();
+            entity.setTopic(dto.getTopic());
+            entity.setQuestion(dto.getQuestion());
+            entity.setAnswer(dto.getAnswer());
+            entity.setOrganisation(organisation);
+
+            // Fetch Study Programs for this question
+            List<StudyProgram> studyPrograms = studyProgramService.getStudyProgramsByIds(
+                dto.getStudyPrograms().stream()
+                    .map(StudyProgramDTO::getId)
+                    .collect(Collectors.toList())
+            );
+            entity.setStudyPrograms(studyPrograms);
+
+            return entity;
+        }).collect(Collectors.toList());
+
+        // Save all SampleQuestions to the database
+        List<SampleQuestion> savedEntities = sampleQuestionRepository.saveAll(entities);
+
+        // Send batch add request to Angelos RAG system
+        boolean success = angelosService.sendBatchSampleQuestionAddRequest(
+            savedEntities.stream()
+                .map(entity -> {
+                    AngelosAddSampleQuestionRequest req = new AngelosAddSampleQuestionRequest();
+                    req.setId(entity.getSqID().toString());
+                    req.setOrgId(orgId);
+                    req.setTopic(entity.getTopic());
+                    req.setQuestion(entity.getQuestion());
+                    req.setAnswer(entity.getAnswer());
+                    req.setStudyPrograms(
+                        entity.getStudyPrograms().stream()
+                            .map(StudyProgram::getName)
+                            .collect(Collectors.toList())
+                    );
+                    return req;
+                })
+                .collect(Collectors.toList())
+        );
+
+        if (!success) {
+            throw new RuntimeException("Failed to send batch add request to Angelos RAG system.");
+        }
+
+        // Convert saved entities back to DTOs for return
+        return savedEntities.stream()
+            .map(this::convertToDto)
+            .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public SampleQuestionDTO editSampleQuestion(Long orgId, UUID sampleQuestionId, SampleQuestionDTO sampleQuestionDTO) {
         // Fetch the existing SampleQuestion by ID
         SampleQuestion existingSampleQuestion = sampleQuestionRepository.findById(sampleQuestionId)
                 .orElseThrow(() -> new ResourceNotFoundException("SampleQuestion not found with id " + sampleQuestionId));
@@ -104,7 +166,7 @@ public class SampleQuestionService {
             existingSampleQuestion.setStudyPrograms(newStudyPrograms);
         }
 
-        boolean success = angelosService.sendSampleQuestionEditRequest(sampleQuestionDTO);
+        boolean success = angelosService.sendSampleQuestionEditRequest(sampleQuestionDTO, orgId);
         if (!success) {
             throw new RuntimeException("Failed to send update request to Angelos RAG system.");
         }
@@ -116,14 +178,14 @@ public class SampleQuestionService {
         return convertToDto(updatedSampleQuestion);
     }
 
-    public void deleteSampleQuestion(Long id, Long orgId) {
+    public void deleteSampleQuestion(UUID id, Long orgId) {
         if (sampleQuestionRepository.existsById(id)) {
             SampleQuestion existingSampleQuestion = sampleQuestionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("SampleQuestion not found with id " + id));
             if (!existingSampleQuestion.getOrganisation().getOrgID().equals(orgId)) {
                 throw new UnauthorizedException("You are not authorized to delete this sample question.");
             } else {
-                boolean success = angelosService.sendSampleQuestionDeleteRequest(id);
+                boolean success = angelosService.sendSampleQuestionDeleteRequest(id.toString());
                 if (!success) {
                     throw new RuntimeException("Failed to send delete request to Angelos RAG system.");
                 }
@@ -136,7 +198,7 @@ public class SampleQuestionService {
 
     public SampleQuestionDTO convertToDto(SampleQuestion sampleQuestion) {
         SampleQuestionDTO dto = new SampleQuestionDTO();
-        dto.setId(sampleQuestion.getSqID());
+        dto.setId(sampleQuestion.getSqID().toString());
         dto.setTopic(sampleQuestion.getTopic());
         dto.setQuestion(sampleQuestion.getQuestion());
         dto.setAnswer(sampleQuestion.getAnswer());

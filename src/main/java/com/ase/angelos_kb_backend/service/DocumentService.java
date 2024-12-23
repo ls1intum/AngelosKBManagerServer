@@ -44,7 +44,7 @@ public class DocumentService {
     /**
      * Get document by ID.
      */
-    public DocumentContent getDocumentById(Long docId, Long orgId) {
+    public DocumentContent getDocumentById(UUID docId, Long orgId) {
         DocumentContent document = documentContentRepository.findById(docId)
                 .orElseThrow(() -> new ResourceNotFoundException("Document not found with id " + docId));
 
@@ -67,7 +67,7 @@ public class DocumentService {
      * Edit a document's title and study programs.
      */
     @Transactional
-    public DocumentDataDTO editDocument(Long orgId, Long docId, DocumentRequestDTO documentRequestDTO) {
+    public DocumentDataDTO editDocument(Long orgId, UUID docId, DocumentRequestDTO documentRequestDTO) {
         DocumentContent document = documentContentRepository.findById(docId)
                 .orElseThrow(() -> new ResourceNotFoundException("Document not found with id " + docId));
 
@@ -123,7 +123,7 @@ public class DocumentService {
 
             // Parse content and send it to Angelos
             String parsedContent = parsingService.parseDocument(file);
-            boolean success = angelosService.sendDocumentAddRequest(dto, parsedContent);
+            boolean success = angelosService.sendDocumentAddRequest(dto, parsedContent, orgId);
             if (!success) {
                 // If the Angelos request fails, throw an exception to trigger rollback
                 throw new RuntimeException("Failed to send add request to Angelos RAG system.");
@@ -139,7 +139,7 @@ public class DocumentService {
     }
 
     @Transactional
-    public void deleteDocument(Long orgId, Long docId) {
+    public void deleteDocument(Long orgId, UUID docId) {
         // Fetch the document from the database
         DocumentContent document = documentContentRepository.findById(docId)
                 .orElseThrow(() -> new ResourceNotFoundException("Document not found with id " + docId));
@@ -163,7 +163,7 @@ public class DocumentService {
      */
     private DocumentDataDTO convertToDataDto(DocumentContent documentContent) {
         return DocumentDataDTO.builder()
-            .id(documentContent.getDocID())
+            .id(documentContent.getDocID().toString())
             .title(documentContent.getTitle())
             .studyPrograms(
                     documentContent.getStudyPrograms().stream()

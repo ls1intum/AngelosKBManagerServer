@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class DocumentDataDTO {
-    private Long id;
+    private String id;
     private String title;
     private List<StudyProgramDTO> studyPrograms;
     private LocalDateTime createdAt;

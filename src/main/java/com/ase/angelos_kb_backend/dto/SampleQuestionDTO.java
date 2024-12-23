@@ -16,7 +16,7 @@ import lombok.ToString;
 @Builder
 @ToString
 public class SampleQuestionDTO {
-    private Long id;
+    private String id;
     private String topic;
     private String question;
     private String answer;

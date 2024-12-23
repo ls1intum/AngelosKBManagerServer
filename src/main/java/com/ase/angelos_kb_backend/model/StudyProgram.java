@@ -3,11 +3,13 @@ package com.ase.angelos_kb_backend.model;
 
 import java.util.List;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import lombok.Data;
 
 @Entity
@@ -18,10 +20,11 @@ public class StudyProgram {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long spID;
 
+    @Column(updatable = false)
     private String name;
 
-    @ManyToMany(mappedBy = "studyPrograms")
-    private List<Organisation> organisations;
+    @ManyToOne
+    private Organisation organisation;
 
     @ManyToMany(mappedBy = "studyPrograms")
     private List<WebsiteContent> websites;

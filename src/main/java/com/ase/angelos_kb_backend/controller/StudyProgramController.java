@@ -1,7 +1,6 @@
 package com.ase.angelos_kb_backend.controller;
 
 import com.ase.angelos_kb_backend.dto.StudyProgramDTO;
-import com.ase.angelos_kb_backend.model.StudyProgram;
 import com.ase.angelos_kb_backend.service.StudyProgramService;
 import com.ase.angelos_kb_backend.util.JwtUtil;
 
@@ -60,11 +59,16 @@ public class StudyProgramController {
      * Create a new study program for an organisation.
      */
     @PostMapping("/create")
-    public ResponseEntity<StudyProgram> createStudyProgram(
+    public ResponseEntity<StudyProgramDTO> createStudyProgram(
             @RequestHeader("Authorization") String token,
-            @RequestParam String studyProgramName) {
-        Long orgId = jwtUtil.extractOrgId(token.replace("Bearer ", ""));
-        StudyProgram newStudyProgram = studyProgramService.createStudyProgram(studyProgramName, orgId);
+            @RequestParam String studyProgramName,
+            @RequestParam(required = false) Long orgId) {
+        Long callerOrgId = jwtUtil.extractOrgId(token.replace("Bearer ", ""));        
+        boolean isSystemAdmin = jwtUtil.extractIsSystemAdmin(token.replace("Bearer ", ""));
+        if (! (orgId != null && isSystemAdmin)) {
+            orgId = callerOrgId;
+        }
+        StudyProgramDTO newStudyProgram = studyProgramService.createStudyProgram(studyProgramName, orgId);
         return ResponseEntity.ok(newStudyProgram);
     }
 }

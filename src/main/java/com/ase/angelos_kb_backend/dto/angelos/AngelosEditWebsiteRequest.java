@@ -12,5 +12,5 @@ import java.util.List;
 @Builder
 public class AngelosEditWebsiteRequest {
     private String title;
-    private List<Long> studyPrograms;
+    private List<String> studyPrograms;
 }

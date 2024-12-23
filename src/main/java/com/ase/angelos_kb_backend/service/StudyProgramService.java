@@ -1,6 +1,5 @@
 package com.ase.angelos_kb_backend.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,7 +34,7 @@ public class StudyProgramService {
             return studyProgramRepository.findAll().stream().map(this::convertToDto).collect(Collectors.toList());
         }
         // Otherwise, filter by organization ID
-        return studyProgramRepository.findByOrganisationsOrgID(orgId).stream().map(this::convertToDto).collect(Collectors.toList());
+        return studyProgramRepository.findByOrganisationOrgID(orgId).stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
     @Transactional
@@ -63,12 +62,13 @@ public class StudyProgramService {
     }
 
     @Transactional
-    public StudyProgram createStudyProgram(String studyProgramName, Long orgId) {
+    public StudyProgramDTO createStudyProgram(String studyProgramName, Long orgId) {
+        // Fetch the Organisation
         Organisation organisation = organisationRepository.findById(orgId)
                 .orElseThrow(() -> new ResourceNotFoundException("Organisation not found with id " + orgId));
 
         // Check if the study program already exists for the organisation
-        boolean exists = studyProgramRepository.existsByNameAndOrganisation(studyProgramName, orgId);
+        boolean exists = studyProgramRepository.existsByNameAndOrganisation(studyProgramName, organisation.getOrgID());
         if (exists) {
             throw new IllegalArgumentException("Study program with the name '" + studyProgramName + "' already exists for this organisation.");
         }
@@ -76,13 +76,19 @@ public class StudyProgramService {
         // Create a new StudyProgram
         StudyProgram newStudyProgram = new StudyProgram();
         newStudyProgram.setName(studyProgramName);
+        newStudyProgram.setOrganisation(organisation); // Set the owning Organisation
 
-        // Add the organisation to the list
-        List<Organisation> organisations = new ArrayList<>();
-        organisations.add(organisation);
-        newStudyProgram.setOrganisations(organisations);
+        // Save the StudyProgram
+        StudyProgram savedStudyProgram = studyProgramRepository.save(newStudyProgram);
 
-        return studyProgramRepository.save(newStudyProgram);
+        // Optional: Add the study program to the organisation's list of study programs
+        organisation.getStudyPrograms().add(savedStudyProgram);
+
+        return convertToDto(savedStudyProgram);
+    }
+
+    public List<StudyProgram> getStudyProgramsByName(String name) {
+        return studyProgramRepository.findByName(name);
     }
 
     /**

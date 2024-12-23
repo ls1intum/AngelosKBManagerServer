@@ -11,8 +11,9 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class AngelosAddDocumentRequest {
-    private Long id;
+    private String id;
     private String title;
-    private List<Long> studyPrograms;
+    private List<String> studyPrograms;
     private String content;
+    private Long orgId;
 }
