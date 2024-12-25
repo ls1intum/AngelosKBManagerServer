@@ -34,6 +34,17 @@ public class JwtUtil {
                 .compact();
     }
 
+    // Generate JWT Token
+    public String generateChatToken(String email, String password) {
+        return Jwts.builder()
+                .setSubject(email)
+                .claim("password", password)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 hours
+                .signWith(signingKey, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
     // Generate Refresh Token
     public String generateRefreshToken(String email) {
         return Jwts.builder()
@@ -68,6 +79,11 @@ public class JwtUtil {
     // Extract isSystemAdmin from JWT Token
     public boolean extractIsSystemAdmin(String token) {
         return extractAllClaims(token).get("isSystemAdmin", Boolean.class);
+    }
+
+    // Extract chat password
+    public String extractChatPassword(String token) {
+        return extractAllClaims(token).get("password", String.class);
     }
 
     // Extract All Claims

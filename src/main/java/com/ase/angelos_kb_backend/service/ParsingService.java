@@ -50,7 +50,6 @@ public class ParsingService {
                 PDFTextStripper stripper = new PDFTextStripper();
                 // Extract text for the entire document
                 String result = stripper.getText(document);
-                System.out.println(result);
                 return result;
             } catch (IOException e) {
                 throw new RuntimeException("Failed to parse PDF document", e);

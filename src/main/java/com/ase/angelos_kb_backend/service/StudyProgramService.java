@@ -37,6 +37,10 @@ public class StudyProgramService {
         return studyProgramRepository.findByOrganisationOrgID(orgId).stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
+    public List<StudyProgramDTO> getAllStudyPrograms() {
+        return studyProgramRepository.findAll().stream().map(this::convertToDto).collect(Collectors.toList());
+    }
+
     @Transactional
     public void addStudyProgramToOrg(Long spId, Long orgId) {
         Organisation organisation = organisationRepository.findById(orgId)

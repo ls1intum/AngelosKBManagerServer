@@ -24,8 +24,11 @@ public class SecurityConfig {
     private final CustomUserDetailsService userDetailsService;
     private final JwtUtil jwtUtil;
 
-    @Value("${cors.allowed-origin}")
-    private String allowedOrigin;
+    @Value("${cors.chatbot}")
+    private String chatbotOrigin;
+
+    @Value("${cors.kb-ui}")
+    private String kbOrigin;
 
     public SecurityConfig(CustomUserDetailsService userDetailsService, JwtUtil jwtUtil) {
         this.userDetailsService = userDetailsService;
@@ -47,6 +50,8 @@ public class SecurityConfig {
                     "/api/users/refresh",
                     "/api/users/logout",
                     "/api/organisations",
+                    "/api/chat/login",
+                    "/api/chat/study-programs/**",
                     "/v3/api-docs/**",
                     "/swagger-ui/**",
                     "/docs/**",
@@ -81,8 +86,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Use the actual frontend URL
-        configuration.addAllowedOrigin(allowedOrigin);
+        configuration.addAllowedOrigin(chatbotOrigin);
+        configuration.addAllowedOrigin(kbOrigin);
         configuration.setAllowCredentials(true);
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
