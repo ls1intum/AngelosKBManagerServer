@@ -27,8 +27,8 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
 
-    @Value("${cors.allowed-origin}")
-    private String allowedOrigin;
+    @Value("${cors.kb-ui}")
+    private String kbOrigin;
 
     public UserService(UserRepository userRepository, OrganisationService organisationService, PasswordEncoder passwordEncoder, EmailService emailService) {
         this.userRepository = userRepository;
@@ -128,7 +128,7 @@ public class UserService {
     private void sendConfirmationEmail(User user) throws MessagingException {
         String token = user.getConfirmationToken();
 
-        String confirmationUrl = allowedOrigin + "/confirm?token=" + token;
+        String confirmationUrl = kbOrigin + "/confirm?token=" + token;
         String subject = "Email Confirmation";
     
         // Implement your email sending logic here

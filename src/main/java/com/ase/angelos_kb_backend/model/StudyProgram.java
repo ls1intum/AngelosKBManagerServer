@@ -10,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Entity
@@ -20,7 +21,8 @@ public class StudyProgram {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long spID;
 
-    @Column(updatable = false)
+    @NotBlank(message = "Name cannot be empty or blank")
+    @Column(nullable = false)
     private String name;
 
     @ManyToOne

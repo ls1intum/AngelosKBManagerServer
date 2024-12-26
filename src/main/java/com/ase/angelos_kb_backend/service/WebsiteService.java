@@ -221,7 +221,7 @@ public class WebsiteService {
 
         // Compute content hash
         String contentHash = parsingService.computeContentHash(parsedContent);
-            
+                    
         // Check if content has actually changed
         if (!contentHash.equals(existingWebsite.getContentHash())) {
             // Content has changed, send update request to Angelos RAG
