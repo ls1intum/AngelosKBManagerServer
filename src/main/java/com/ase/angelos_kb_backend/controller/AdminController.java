@@ -115,10 +115,14 @@ public class AdminController {
                 continue;
             }
 
+            // Handle wrongly formatted input JSONs (trailing quote)
+            String question = sqJson.getQuestion();
+            question = (question != null && question.endsWith("\"")) ? question.substring(0, question.length() - 1) : question;
+            
             SampleQuestionDTO dto = new SampleQuestionDTO();
             dto.setId(null); // ID will be assigned on save
             dto.setTopic(sqJson.getTopic());
-            dto.setQuestion(sqJson.getQuestion());
+            dto.setQuestion(question);
             dto.setAnswer(sqJson.getAnswer());
             dto.setStudyPrograms(studyProgramDTOs);
             

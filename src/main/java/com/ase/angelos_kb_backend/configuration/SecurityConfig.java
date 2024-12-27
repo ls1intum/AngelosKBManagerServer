@@ -52,6 +52,7 @@ public class SecurityConfig {
                     "/api/organisations",
                     "/api/chat/login",
                     "/api/chat/study-programs/**",
+                    "/api/chat/send",
                     "/v3/api-docs/**",
                     "/swagger-ui/**",
                     "/docs/**",
