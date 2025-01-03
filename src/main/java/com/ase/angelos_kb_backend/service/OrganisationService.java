@@ -6,9 +6,11 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.ase.angelos_kb_backend.dto.OrganisationDTO;
+import com.ase.angelos_kb_backend.dto.eunomnia.MailCredentialsDTO;
 import com.ase.angelos_kb_backend.exception.ResourceNotFoundException;
 import com.ase.angelos_kb_backend.model.Organisation;
 import com.ase.angelos_kb_backend.repository.OrganisationRepository;
+import com.ase.angelos_kb_backend.util.MailStatus;
 
 @Service
 public class OrganisationService {
@@ -46,6 +48,35 @@ public class OrganisationService {
         return organisations.stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
+    }
+
+    public void setCredentials(Long orgId, MailCredentialsDTO credentialsDTO) {
+        Organisation org = this.getOrganisationById(orgId);
+        
+        org.setMailAccount(credentialsDTO.getMailAccount());
+        org.setMailStatus(MailStatus.INACTIVE);
+
+        organisationRepository.save(org);
+    }
+
+    public String getCredentials(Long orgId) {
+        Organisation org = this.getOrganisationById(orgId);
+        return org.getMailAccount();
+    }
+
+    public void setMailStatus(Long orgId, MailStatus status) {
+        Organisation org = this.getOrganisationById(orgId);
+        org.setMailStatus(status);
+
+        organisationRepository.save(org);
+    }
+
+    public List<OrganisationDTO> getOrganisationsForMail() {
+        List<OrganisationDTO> result = organisationRepository.findAll().stream()
+            .filter(a -> !a.getMailAccount().equals(null))
+            .map(this::convertToDto)
+            .collect(Collectors.toList());
+        return result;
     }
          
 

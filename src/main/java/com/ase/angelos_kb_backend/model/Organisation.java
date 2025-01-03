@@ -2,6 +2,8 @@ package com.ase.angelos_kb_backend.model;
 
 import java.util.List;
 
+import com.ase.angelos_kb_backend.util.MailStatus;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -22,6 +24,9 @@ public class Organisation {
     private Long orgID;
 
     private String name;
+
+    private String mailAccount;
+    private MailStatus mailStatus;
 
     @OneToMany(mappedBy = "organisation", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<User> users;

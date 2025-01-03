@@ -21,6 +21,7 @@ import com.ase.angelos_kb_backend.dto.angelos.AngelosEditDocumentRequest;
 import com.ase.angelos_kb_backend.dto.angelos.AngelosEditSampleQuestionRequest;
 import com.ase.angelos_kb_backend.dto.angelos.AngelosEditWebsiteRequest;
 import com.ase.angelos_kb_backend.dto.angelos.AngelosRefreshContentRequest;
+import com.ase.angelos_kb_backend.dto.eunomnia.MailResponseRequestDTO;
 
 @Component
 public class AngelosService {
@@ -41,6 +42,9 @@ public class AngelosService {
         return secret.equals(angelosSecret);
     }
 
+    /**
+     * Forwards an chat request from the chatbot to the RAG
+     */
     public AngelosChatResponse sendChatMessage(AngelosChatRequest request, boolean filterByOrg) {
         String endpoint = angelosUrl + "/v1/question/chat?filterByOrg=" + filterByOrg;
     
@@ -53,6 +57,25 @@ public class AngelosService {
         ResponseEntity<AngelosChatResponse> response = 
             restTemplate.postForEntity(endpoint, requestEntity, AngelosChatResponse.class);
     
+        return response.getBody();
+    }
+
+    /**
+     * Forwards an response request from the mail pipeline to the RAG
+     */
+    public AngelosChatResponse sendAskRequest(MailResponseRequestDTO request) {
+        String endpoint = angelosUrl + "/v1/question/ask";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("x-api-key", angelosSecret);
+
+        // Wrap the request in an HttpEntity
+        HttpEntity<MailResponseRequestDTO> requestEntity = new HttpEntity<>(request, headers);
+
+        // Make the POST call
+        ResponseEntity<AngelosChatResponse> response =
+            restTemplate.postForEntity(endpoint, requestEntity, AngelosChatResponse.class);
+
         return response.getBody();
     }
 

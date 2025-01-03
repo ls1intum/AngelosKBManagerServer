@@ -105,11 +105,13 @@ public class AdminController {
         Resource[] resources = resolver.getResources("classpath:db-init/sample-questions/*.json");
         System.out.println(resources.length + " sample question resources found.");
 
+        int numberOfOrgPrograms = organisationService.getOrganisationById(orgId).getStudyPrograms().size();
+
         for (Resource resource : resources) {
             SampleQuestionJson sqJson = new ObjectMapper().readValue(resource.getInputStream(), SampleQuestionJson.class);
             
             // Process study program
-            List<StudyProgramDTO> studyProgramDTOs = resolveStudyPrograms(orgId, sqJson.getStudyProgram());
+            List<StudyProgramDTO> studyProgramDTOs = resolveStudyPrograms(orgId, numberOfOrgPrograms, sqJson.getStudyProgram());
             if (studyProgramDTOs == null) {
                 // Means study program not found or doesn't belong to org; skip
                 continue;
@@ -139,11 +141,13 @@ public class AdminController {
         ObjectMapper objectMapper = new ObjectMapper();
         System.out.println(resources.length + " website resources found.");
 
+        int numberOfOrgPrograms = organisationService.getOrganisationById(orgId).getStudyPrograms().size();
+
         for (Resource resource : resources) {
             WebsiteJson wJson = objectMapper.readValue(resource.getInputStream(), WebsiteJson.class);
 
             // Process study program
-            List<StudyProgramDTO> studyProgramDTOs = resolveStudyPrograms(orgId, wJson.getStudyProgram());
+            List<StudyProgramDTO> studyProgramDTOs = resolveStudyPrograms(orgId, numberOfOrgPrograms, wJson.getStudyProgram());
             if (studyProgramDTOs == null) {
                 // Skip if study program is invalid or belongs to another org
                 continue;
@@ -192,12 +196,12 @@ public class AdminController {
     /**
      * Resolves the study programs from the given string.
      * Returns:
-     * - Empty list if "general"
+     * - Empty list if "general" or all study programs of org
      * - A single-element list if found
      * - null if not found or doesn't belong to given org
      */
-    private List<StudyProgramDTO> resolveStudyPrograms(Long orgId, String programSlug) {
-        // Handling of general links
+    private List<StudyProgramDTO> resolveStudyPrograms(Long orgId, int numberOfOrgPrograms, String programSlug) {
+        // Handling of general information
         if ("general".equalsIgnoreCase(programSlug)) {
             return Collections.emptyList();
         }
@@ -214,6 +218,10 @@ public class AdminController {
                 .collect(Collectors.toList());
         if (filtered.isEmpty()) {
             return null;
+        }
+        // Handling of information concerning every study program
+        if (numberOfOrgPrograms == filtered.size()) {
+            return Collections.emptyList();
         }
 
         return filtered.stream()

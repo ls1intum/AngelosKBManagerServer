@@ -84,7 +84,7 @@ public class ChatController {
      * TODO: Remove
      */
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> postMethodName(@RequestHeader("x_api_key") String apiKey, @RequestBody LoginRequestDTO body) {
+    public ResponseEntity<Map<String, String>> postMethodName(@RequestHeader("x-api-key") String apiKey, @RequestBody LoginRequestDTO body) {
         if (angelosService.verifyAPIKey(apiKey) && body.getEmail().equals(angelosUsername) && body.getPassword().equals(angelosPassword)) {
             String chatToken = jwtUtil.generateChatToken(body.getEmail(), body.getPassword());
             return ResponseEntity.ok().body(Map.of("accessToken", chatToken));
