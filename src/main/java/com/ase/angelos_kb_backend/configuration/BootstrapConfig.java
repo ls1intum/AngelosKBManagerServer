@@ -54,5 +54,7 @@ public class BootstrapConfig {
             admin.setOrganisation(systemOrg); // Assign the "System Organisation"
             userRepository.save(admin);
         }
+
+        System.out.println("System admin created.");
     }
 }

@@ -88,8 +88,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOrigin(chatbotOrigin);
-        configuration.addAllowedOrigin(kbOrigin);
+        configuration.addAllowedOriginPattern("*");
+        //configuration.addAllowedOrigin(kbOrigin);
         configuration.setAllowCredentials(true);
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
