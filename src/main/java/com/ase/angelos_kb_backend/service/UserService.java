@@ -128,7 +128,7 @@ public class UserService {
     private void sendConfirmationEmail(User user) throws MessagingException {
         String token = user.getConfirmationToken();
 
-        String confirmationUrl = kbOrigin + "/confirm?token=" + token;
+        String confirmationUrl = kbOrigin + "/knowledge-manager/confirm?token=" + token;
         String subject = "Email Confirmation";
     
         // Implement your email sending logic here
