@@ -27,4 +27,4 @@ COPY --from=build /app/target/angelos-kb-backend-0.0.1-SNAPSHOT.jar /app/app.jar
 EXPOSE 9007
 
 # Default entrypoint
-ENTRYPOINT ["java", "-jar", "/app/app.jar", "--spring.config.location=classpath:/"]
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
