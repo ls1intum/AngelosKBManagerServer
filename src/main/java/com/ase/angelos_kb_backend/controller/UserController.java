@@ -80,7 +80,7 @@ public class UserController {
             @RequestHeader("Authorization") String token,
             @PathVariable Long userId) {
         Long orgId = jwtUtil.extractOrgId(token.replace("Bearer ", ""));
-        UserDTO updatedUser = userService.setUserToAdmin(orgId, userId);
+        UserDTO updatedUser = userService.setUserToAdmin(userId, orgId);
         return ResponseEntity.ok(updatedUser);
     }
 
