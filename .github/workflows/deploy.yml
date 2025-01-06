@@ -124,5 +124,6 @@ jobs:
             fi
 
             # Start up containers
+            docker compose pull angelos-server
             docker compose up --build -d --force-recreate --remove-orphans
             docker ps
