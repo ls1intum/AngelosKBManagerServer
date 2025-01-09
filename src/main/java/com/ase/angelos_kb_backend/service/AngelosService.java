@@ -109,10 +109,11 @@ public class AngelosService {
     /**
      * Send a request to update a website's title and study programs.
      */
-    public boolean sendWebsiteUpdateRequest(String id, String title, List<String> studyPrograms) {
+    public boolean sendWebsiteUpdateRequest(String id, String title, List<String> studyPrograms, Long orgId) {
         AngelosEditWebsiteRequest body = new AngelosEditWebsiteRequest();
         body.setTitle(title);
         body.setStudyPrograms(studyPrograms);
+        body.setOrgId(orgId);
 
         String endpoint = angelosUrl + "/knowledge/website/" + id + "/update";
         return sendPostRequest(endpoint, body);
@@ -155,10 +156,11 @@ public class AngelosService {
     /**
      * Send a request to edit a document resource.
      */
-    public boolean sendDocumentEditRequest(DocumentDataDTO doc) {
+    public boolean sendDocumentEditRequest(DocumentDataDTO doc, Long orgId) {
         AngelosEditDocumentRequest body = new AngelosEditDocumentRequest();
         body.setTitle(doc.getTitle());
         body.setStudyPrograms(doc.getStudyPrograms().stream().map(sp -> sp.getName()).toList());
+        body.setOrgId(orgId);
 
         String endpoint = angelosUrl + "/knowledge/document/" + doc.getId() + "/edit";
         return sendPostRequest(endpoint, body);

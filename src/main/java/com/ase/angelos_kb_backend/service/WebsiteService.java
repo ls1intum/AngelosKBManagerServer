@@ -209,7 +209,7 @@ public class WebsiteService {
                 .collect(Collectors.toList());
 
             // Convert StudyProgram entities to DTOs
-            boolean success = angelosService.sendWebsiteUpdateRequest(websiteId.toString(), websiteRequestDTO.getTitle(), studyProgramNames);
+            boolean success = angelosService.sendWebsiteUpdateRequest(websiteId.toString(), websiteRequestDTO.getTitle(), studyProgramNames, orgId);
             if (!success) {
                 throw new RuntimeException("Failed to send update request to Angelos RAG system.");
             }

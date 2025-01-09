@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class AngelosEditDocumentRequest {
+    private Long orgId;
     private String title;
     private List<String> studyPrograms;
 }

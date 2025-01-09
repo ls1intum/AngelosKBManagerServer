@@ -78,6 +78,18 @@ public class DocumentService {
         // Update title
         document.setTitle(documentRequestDTO.getTitle());
 
+        DocumentDataDTO documentDataDTO = new DocumentDataDTO();
+        documentDataDTO.setId(docId.toString());
+        documentDataDTO.setTitle(documentRequestDTO.getTitle());
+        documentDataDTO.setUpdatedAt(document.getUpdatedAt());
+        documentDataDTO.setCreatedAt(document.getCreatedAt());
+        documentDataDTO.setStudyPrograms(document.getStudyPrograms().stream().map(studyProgramService::convertToDto).toList());
+
+        boolean success = angelosService.sendDocumentEditRequest(documentDataDTO, orgId);
+        if (!success) {
+            throw new RuntimeException("Failed to send update request to Angelos RAG system.");
+        }
+
         // Update Study Programs
         List<StudyProgram> newStudyPrograms = studyProgramService.getStudyProgramsByIds(documentRequestDTO.getStudyProgramIds());
         document.setStudyPrograms(newStudyPrograms);

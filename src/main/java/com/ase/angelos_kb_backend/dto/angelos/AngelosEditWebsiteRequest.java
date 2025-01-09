@@ -11,6 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class AngelosEditWebsiteRequest {
+    private Long orgId;
     private String title;
     private List<String> studyPrograms;
 }
