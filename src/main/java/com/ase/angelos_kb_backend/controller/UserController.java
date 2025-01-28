@@ -118,7 +118,7 @@ public class UserController {
             .httpOnly(true)
             .secure(false) // TODO: Change this when deployed
             .sameSite("Lax") // For cross-site requests, None is required when sending cookies
-            .path("/api/users")
+            .path("/")
             .maxAge(7 * 24 * 60 * 60) // Refresh token expiry, say one week
             .build();
 
@@ -158,9 +158,9 @@ public class UserController {
         // Create a cookie with the same name and attributes but zero max-age to remove it
         HttpCookie invalidCookie = ResponseCookie.from("refreshToken", "")
             .httpOnly(true)
-            .secure(true)
+            .secure(false)
             .sameSite("Strict")
-            .path("/refresh")
+            .path("/")
             .maxAge(0) // Invalidate the cookie immediately
             .build();
 
