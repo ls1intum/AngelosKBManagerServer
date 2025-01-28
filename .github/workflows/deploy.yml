@@ -86,8 +86,8 @@ jobs:
             echo "ANGELOS_SECRET=${{ secrets.ANGELOS_SECRET }}" >> /home/${{ vars.VM_USERNAME }}/${{ github.repository }}/.env
             echo "ANGELOS_USERNAME=${{ secrets.ANGELOS_USERNAME }}" >> /home/${{ vars.VM_USERNAME }}/${{ github.repository }}/.env
             echo "ANGELOS_PASSWORD=${{ secrets.ANGELOS_PASSWORD }}" >> /home/${{ vars.VM_USERNAME }}/${{ github.repository }}/.env
-            echo "EUNOMNIA_URL=${{ secrets.EUNOMNIA_URL }}" >> /home/${{ vars.VM_USERNAME }}/${{ github.repository }}/.env
-            echo "EUNOMNIA_SECRET=${{ secrets.EUNOMNIA_SECRET }}" >> /home/${{ vars.VM_USERNAME }}/${{ github.repository }}/.env
+            echo "EUNOMIA_URL=${{ secrets.EUNOMNIA_URL }}" >> /home/${{ vars.VM_USERNAME }}/${{ github.repository }}/.env
+            echo "EUNOMIA_SECRET=${{ secrets.EUNOMNIA_SECRET }}" >> /home/${{ vars.VM_USERNAME }}/${{ github.repository }}/.env
 
         # Create .env.postgres file for Postgres on VM
       - name: Create .env.postgres on VM

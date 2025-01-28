@@ -90,6 +90,8 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.addAllowedOrigin(chatbotOrigin);
         configuration.addAllowedOrigin(kbOrigin);
+        configuration.addAllowedOrigin("*");
+
         configuration.setAllowCredentials(true);
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");

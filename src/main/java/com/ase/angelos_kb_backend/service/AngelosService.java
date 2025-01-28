@@ -21,7 +21,7 @@ import com.ase.angelos_kb_backend.dto.angelos.AngelosEditDocumentRequest;
 import com.ase.angelos_kb_backend.dto.angelos.AngelosEditSampleQuestionRequest;
 import com.ase.angelos_kb_backend.dto.angelos.AngelosEditWebsiteRequest;
 import com.ase.angelos_kb_backend.dto.angelos.AngelosRefreshContentRequest;
-import com.ase.angelos_kb_backend.dto.eunomnia.MailResponseRequestDTO;
+import com.ase.angelos_kb_backend.dto.eunomia.MailResponseRequestDTO;
 
 @Component
 public class AngelosService {
@@ -233,6 +233,7 @@ public class AngelosService {
             
             return response.getStatusCode().is2xxSuccessful();
         } catch (Exception e) {
+            System.err.println("Error sending request: " + e.getMessage());
             return false;
         }
     }
