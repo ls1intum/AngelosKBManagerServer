@@ -158,7 +158,7 @@ public class UserController {
         // Create a cookie with the same name and attributes but zero max-age to remove it
         HttpCookie invalidCookie = ResponseCookie.from("refreshToken", "")
             .httpOnly(true)
-            .secure(false)
+            .secure(true)
             .sameSite("Strict")
             .path("/")
             .maxAge(0) // Invalidate the cookie immediately
