@@ -100,7 +100,7 @@ public class ChatController {
         token = token.replace("Bearer ", "");
         List<StudyProgramDTO> studyPrograms = new ArrayList<>();
         if (jwtUtil.extractEmail(token).equals(angelosUsername) && jwtUtil.extractChatPassword(token).equals(angelosPassword)) {
-            if (! filterByOrg) {
+            if (filterByOrg) {
                 studyPrograms = studyProgramService.getAllStudyProgramsByOrgId(orgId);
             } else {
                 studyPrograms = studyProgramService.getAllStudyPrograms();
