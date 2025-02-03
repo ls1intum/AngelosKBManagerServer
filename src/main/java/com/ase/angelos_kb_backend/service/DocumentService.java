@@ -67,7 +67,7 @@ public class DocumentService {
      * Edit a document's title and study programs.
      */
     @Transactional
-    public DocumentDataDTO editDocument(Long orgId, UUID docId, DocumentRequestDTO documentRequestDTO) {
+    public DocumentDataDTO editDocument(Long orgId, UUID docId, DocumentRequestDTO documentRequestDTO, MultipartFile file) {
         DocumentContent document = documentContentRepository.findById(docId)
                 .orElseThrow(() -> new ResourceNotFoundException("Document not found with id " + docId));
 
@@ -75,30 +75,49 @@ public class DocumentService {
             throw new UnauthorizedException("You are not authorized to edit this document.");
         }
 
-        // Update title
+        // Update Title
         document.setTitle(documentRequestDTO.getTitle());
-
-        DocumentDataDTO documentDataDTO = new DocumentDataDTO();
-        documentDataDTO.setId(docId.toString());
-        documentDataDTO.setTitle(documentRequestDTO.getTitle());
-        documentDataDTO.setUpdatedAt(document.getUpdatedAt());
-        documentDataDTO.setCreatedAt(document.getCreatedAt());
-        documentDataDTO.setStudyPrograms(document.getStudyPrograms().stream().map(studyProgramService::convertToDto).toList());
-
-        boolean success = angelosService.sendDocumentEditRequest(documentDataDTO, orgId);
-        if (!success) {
-            throw new RuntimeException("Failed to send update request to Angelos RAG system.");
-        }
 
         // Update Study Programs
         List<StudyProgram> newStudyPrograms = studyProgramService.getStudyProgramsByIds(documentRequestDTO.getStudyProgramIds());
         document.setStudyPrograms(newStudyPrograms);
 
-        // Save changes
         DocumentContent updatedDocument = documentContentRepository.save(document);
+        DocumentDataDTO documentDataDTO = convertToDataDto(updatedDocument);
 
-        // Map to Data DTO
-        return convertToDataDto(updatedDocument);
+        boolean success = false;
+        success = angelosService.sendDocumentEditRequest(documentDataDTO, orgId);
+
+        // If a new file is uploaded, replace the old one
+        if (success && file != null && !file.isEmpty()) {
+            if (file.getSize() > 5 * 1024 * 1024) { // 5MB limit
+                throw new IllegalArgumentException("File size exceeds the maximum allowed size of 5MB.");
+            }
+
+            // Delete the old file if it exists
+            if (document.getFilename() != null) {
+                fileStorageService.deleteFile(document.getFilename());
+            }
+
+            String newFilename = UUID.randomUUID().toString() + ".pdf";
+            fileStorageService.storeFile(file, newFilename);
+            document.setFilename(newFilename);
+            document.setOriginalFilename(file.getOriginalFilename());
+
+            String parsedContent = parsingService.parseDocument(file);
+            String contentHash = parsingService.computeContentHash(parsedContent);
+
+            if (document.getContentHash() == null || ! contentHash.equals(document.getContentHash())) {
+                success = angelosService.sendDocumentRefreshRequest(documentDataDTO.getId(), parsedContent);
+                document.setContentHash(contentHash);
+            }
+        }
+
+        if (!success) {
+            throw new RuntimeException("Failed to send update request to Angelos RAG system.");
+        }
+
+        return documentDataDTO;
     }
 
     @Transactional

@@ -49,6 +49,8 @@ public class DocumentContent {
     )
     private List<StudyProgram> studyPrograms;
 
+    private String contentHash;
+
     @PrePersist
     protected void onCreate() {
         LocalDateTime now = LocalDateTime.now();
