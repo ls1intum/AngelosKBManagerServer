@@ -1,6 +1,7 @@
 package com.ase.angelos_kb_backend.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -32,6 +33,18 @@ public class OrganisationService {
 
         Organisation savedOrganisation = organisationRepository.save(organisation);
         return convertToDto(savedOrganisation);
+    }
+    public OrganisationDTO updateOrganisation(Long id, OrganisationDTO updatedOrganisation) {
+        Optional<Organisation> optionalOrg = organisationRepository.findById(id);
+        if(optionalOrg.isEmpty()) {
+            return null;
+        }
+        Organisation existingOrg = optionalOrg.get();
+        if (updatedOrganisation.getName() != null) {
+            existingOrg.setName(updatedOrganisation.getName());
+        }
+        Organisation savedOrg = organisationRepository.save(existingOrg);
+        return convertToDto(savedOrg);
     }
 
     public boolean removeOrganisation(Long orgId) {

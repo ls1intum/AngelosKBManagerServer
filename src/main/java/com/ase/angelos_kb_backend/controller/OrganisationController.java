@@ -5,6 +5,7 @@ import com.ase.angelos_kb_backend.service.OrganisationService;
 import com.ase.angelos_kb_backend.util.JwtUtil;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
@@ -50,6 +51,24 @@ public class OrganisationController {
 
         OrganisationDTO newOrganisation = organisationService.addOrganisation(name);
         return ResponseEntity.status(HttpStatus.CREATED).body(newOrganisation);
+    }
+
+    /**
+     * Update an existing organisation. Only accessible by system admin.
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<OrganisationDTO> updateOrganisation(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long id,
+            @RequestBody OrganisationDTO organisation) {
+        if (!jwtUtil.extractIsSystemAdmin(token.replace("Bearer ", ""))) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        OrganisationDTO newOrganisation = organisationService.updateOrganisation(id, organisation);
+        if (newOrganisation == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.ok(newOrganisation);
     }
 
     /**
