@@ -25,6 +25,7 @@ import com.ase.angelos_kb_backend.configuration.CustomUserDetails;
 import com.ase.angelos_kb_backend.dto.LoginRequestDTO;
 import com.ase.angelos_kb_backend.dto.RegisterRequestDTO;
 import com.ase.angelos_kb_backend.dto.UserDTO;
+import com.ase.angelos_kb_backend.dto.UserDetailsDTO;
 import com.ase.angelos_kb_backend.exception.UnauthorizedException;
 import com.ase.angelos_kb_backend.service.AuthenticationService;
 import com.ase.angelos_kb_backend.service.UserService;
@@ -54,9 +55,9 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserDTO> getCurrentUser(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<UserDetailsDTO> getCurrentUser(@RequestHeader("Authorization") String token) {
         String email = jwtUtil.extractEmail(token.replace("Bearer ", ""));
-        UserDTO user = userService.findByMail(email);
+        UserDetailsDTO user = userService.findMe(email);
         return ResponseEntity.ok(user);
     }
 
@@ -81,6 +82,18 @@ public class UserController {
             @PathVariable Long userId) {
         Long orgId = jwtUtil.extractOrgId(token.replace("Bearer ", ""));
         UserDTO updatedUser = userService.setUserToAdmin(userId, orgId);
+        return ResponseEntity.ok(updatedUser);
+    }
+
+    /**
+     * Remove a user from the organisation by making the user unconfirmed again.
+     */
+    @PatchMapping("/{userId}/remove")
+    public ResponseEntity<UserDTO> removeUserFromOrg(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long userId) {
+        Long orgId = jwtUtil.extractOrgId(token.replace("Bearer ", ""));
+        UserDTO updatedUser = userService.removeUser(userId, orgId);
         return ResponseEntity.ok(updatedUser);
     }
 

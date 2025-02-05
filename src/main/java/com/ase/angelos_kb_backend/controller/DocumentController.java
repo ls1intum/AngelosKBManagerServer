@@ -64,14 +64,40 @@ public class DocumentController {
     /**
      * Edit a document's title and study programs.
      */
-    @PutMapping("/{docId}")
+    @SuppressWarnings("null")
+    @PutMapping(value = "/{docId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(
+        summary = "Edit a document",
+        description = "Updates a document's metadata and optionally its file",
+        requestBody = @RequestBody(
+            required = true,
+            content = {
+                @Content(
+                    mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+                    schema = @Schema(implementation = DocumentUploadRequestDTO.class),
+                    encoding = {
+                        @Encoding(name = "documentRequestDTO", contentType = MediaType.APPLICATION_JSON_VALUE),
+                        @Encoding(name = "file", contentType = "application/pdf")
+                    }
+                )
+            }
+        )
+    )
     public ResponseEntity<DocumentDataDTO> editDocument(
             @RequestHeader("Authorization") String token,
             @PathVariable UUID docId,
-            @Valid @org.springframework.web.bind.annotation.RequestBody DocumentRequestDTO documentRequestDTO) {
+            @Valid @RequestPart("documentRequestDTO") DocumentRequestDTO documentRequestDTO,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
 
         Long orgId = jwtUtil.extractOrgId(token.replace("Bearer ", ""));
-        DocumentDataDTO updatedDocument = documentService.editDocument(orgId, docId, documentRequestDTO);
+
+        if (file != null && file.getContentType() != null && !file.getContentType().equals("application/pdf")) {
+            return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+                    .body(null);
+        }
+
+        DocumentDataDTO updatedDocument = documentService.editDocument(orgId, docId, documentRequestDTO, file);
+
         return ResponseEntity.ok(updatedDocument);
     }
 
