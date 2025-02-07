@@ -13,4 +13,5 @@ import lombok.ToString;
 @ToString
 public class UserDetailsDTO extends UserDTO {
     private String organisationName;
+    private boolean isSystemAdmin;
 }

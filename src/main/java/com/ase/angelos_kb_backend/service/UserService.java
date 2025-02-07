@@ -60,6 +60,7 @@ public class UserService {
         userDetails.setId(user.getUserID());
         userDetails.setMail(user.getMail());
         userDetails.setAdmin(user.isAdmin());
+        userDetails.setSystemAdmin(user.isSystemAdmin());
         userDetails.setApproved(user.isApproved());
         userDetails.setOrganisationName(user.getOrganisation().getName());
         
