@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.ase.angelos_kb_backend.dto.OrganisationDTO;
-import com.ase.angelos_kb_backend.dto.eunomnia.MailCredentialsDTO;
+import com.ase.angelos_kb_backend.dto.eunomia.MailCredentialsDTO;
 import com.ase.angelos_kb_backend.exception.ResourceNotFoundException;
 import com.ase.angelos_kb_backend.model.Organisation;
 import com.ase.angelos_kb_backend.repository.OrganisationRepository;

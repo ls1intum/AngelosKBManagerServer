@@ -1,4 +1,4 @@
-package com.ase.angelos_kb_backend.dto.eunomnia;
+package com.ase.angelos_kb_backend.dto.eunomia;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
