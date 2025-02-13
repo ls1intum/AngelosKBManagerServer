@@ -51,10 +51,8 @@ public class SampleQuestionController {
             @RequestHeader("Authorization") String token,
             @Valid @RequestBody SampleQuestionDTO sampleQuestionDTO) {
         try {
-            System.out.println("addSampleQuestion");
             Long orgId = jwtUtil.extractOrgId(token.replace("Bearer ", ""));
             SampleQuestionDTO responseDTO = sampleQuestionService.addSampleQuestion(orgId, sampleQuestionDTO);
-            System.out.println("added sample question");
             return ResponseEntity.ok(responseDTO);
         } catch (Exception e) {
             System.err.println("Error adding sample question: " + e.getMessage());

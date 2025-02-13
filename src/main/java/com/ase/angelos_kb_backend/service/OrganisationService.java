@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.ase.angelos_kb_backend.dto.OrganisationDTO;
@@ -17,9 +19,11 @@ import com.ase.angelos_kb_backend.util.MailStatus;
 public class OrganisationService {
 
     private final OrganisationRepository organisationRepository;
+    private final EunomiaService eunomiaService;
 
-    public OrganisationService(OrganisationRepository organisationRepository) {
+    public OrganisationService(OrganisationRepository organisationRepository, EunomiaService eunomiaService) {
         this.organisationRepository = organisationRepository;
+        this.eunomiaService = eunomiaService;
     }
 
     public Organisation getOrganisationById(Long id) {
@@ -34,6 +38,7 @@ public class OrganisationService {
         Organisation savedOrganisation = organisationRepository.save(organisation);
         return convertToDto(savedOrganisation);
     }
+
     public OrganisationDTO updateOrganisation(Long id, OrganisationDTO updatedOrganisation) {
         Optional<Organisation> optionalOrg = organisationRepository.findById(id);
         if(optionalOrg.isEmpty()) {
@@ -91,7 +96,35 @@ public class OrganisationService {
             .collect(Collectors.toList());
         return result;
     }
-         
+
+    @CacheEvict(value = "orgResponseActive", key = "#orgId")
+    public OrganisationDTO setResponseActive(Long orgId, boolean active) {
+        Optional<Organisation> optionalOrg = organisationRepository.findById(orgId);
+        if (optionalOrg.isEmpty()) {
+            return null;
+        }
+        boolean success = true;
+        if (! active) {
+            success = this.eunomiaService.stopThread(orgId);
+        }
+
+        if (success) {
+            Organisation org = optionalOrg.get();
+            org.setResponseActive(active);
+        
+            Organisation saved = organisationRepository.save(org);
+            return convertToDto(saved);
+        } else {
+            throw new RuntimeException();
+        }
+    }
+
+    @Cacheable("orgResponseActive") // or your chosen cache name
+    public boolean isResponseActive(Long orgId) {
+        return organisationRepository.findById(orgId)
+                .map(Organisation::getResponseActive)
+                .orElse(false);
+    }
 
     private OrganisationDTO convertToDto(Organisation organisation) {
         OrganisationDTO dto = new OrganisationDTO();
