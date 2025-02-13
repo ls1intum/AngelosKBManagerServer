@@ -85,6 +85,8 @@ public class ChatController {
      */
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> postMethodName(@RequestHeader("x-api-key") String apiKey, @RequestBody LoginRequestDTO body) {
+
+        System.out.println(body);
         if (angelosService.verifyAPIKey(apiKey) && body.getEmail().equals(angelosUsername) && body.getPassword().equals(angelosPassword)) {
             String chatToken = jwtUtil.generateChatToken(body.getEmail(), body.getPassword());
             return ResponseEntity.ok().body(Map.of("accessToken", chatToken));
@@ -100,7 +102,7 @@ public class ChatController {
         token = token.replace("Bearer ", "");
         List<StudyProgramDTO> studyPrograms = new ArrayList<>();
         if (jwtUtil.extractEmail(token).equals(angelosUsername) && jwtUtil.extractChatPassword(token).equals(angelosPassword)) {
-            if (! filterByOrg) {
+            if (filterByOrg) {
                 studyPrograms = studyProgramService.getAllStudyProgramsByOrgId(orgId);
             } else {
                 studyPrograms = studyProgramService.getAllStudyPrograms();

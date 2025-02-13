@@ -71,4 +71,16 @@ public class StudyProgramController {
         StudyProgramDTO newStudyProgram = studyProgramService.createStudyProgram(studyProgramName, orgId);
         return ResponseEntity.ok(newStudyProgram);
     }
+
+    /**
+     * Delete a study program.
+     */
+    @DeleteMapping("/{spId}")
+    public ResponseEntity<Void> deleteStudyProgram(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long spId) {
+        Long orgId = jwtUtil.extractOrgId(token.replace("Bearer ", ""));
+        studyProgramService.deleteStudyProgram(spId, orgId);
+        return ResponseEntity.ok().build();
+    }
 }

@@ -1,6 +1,6 @@
-package com.ase.angelos_kb_backend.dto.eunomnia;
+package com.ase.angelos_kb_backend.dto.eunomia;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,9 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MailCredentialsDTO {
-    @JsonProperty("mailAccount")
+public class MailThreadRequestDTO {
     private String mailAccount;
-    @JsonProperty("mailPassword")
     private String mailPassword;
+    private List<String> studyPrograms;
 }

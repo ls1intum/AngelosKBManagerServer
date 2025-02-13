@@ -8,10 +8,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ase.angelos_kb_backend.dto.StudyProgramDTO;
 import com.ase.angelos_kb_backend.exception.ResourceNotFoundException;
+import com.ase.angelos_kb_backend.exception.UnauthorizedException;
+import com.ase.angelos_kb_backend.model.DocumentContent;
 import com.ase.angelos_kb_backend.model.Organisation;
+import com.ase.angelos_kb_backend.model.SampleQuestion;
 import com.ase.angelos_kb_backend.model.StudyProgram;
+import com.ase.angelos_kb_backend.model.WebsiteContent;
+import com.ase.angelos_kb_backend.repository.DocumentContentRepository;
 import com.ase.angelos_kb_backend.repository.OrganisationRepository;
+import com.ase.angelos_kb_backend.repository.SampleQuestionRepository;
 import com.ase.angelos_kb_backend.repository.StudyProgramRepository;
+import com.ase.angelos_kb_backend.repository.WebsiteContentRepository;
 
 
 @Service
@@ -19,11 +26,27 @@ public class StudyProgramService {
     private final StudyProgramRepository studyProgramRepository;
     private final OrganisationRepository organisationRepository;
     private final OrganisationService organisationService;
+    private final SampleQuestionRepository sampleQuestionRepository;
+    private final WebsiteContentRepository websiteContentRepository;
+    private final DocumentContentRepository documentContentRepository;
+    private final AngelosService angelosService;
 
-    public StudyProgramService(StudyProgramRepository studyProgramRepository, OrganisationRepository organisationRepository, OrganisationService organisationService) {
+    public StudyProgramService(
+            StudyProgramRepository studyProgramRepository, 
+            OrganisationRepository organisationRepository, 
+            OrganisationService organisationService,
+            SampleQuestionRepository sampleQuestionRepository,
+            WebsiteContentRepository websiteContentRepository,
+            DocumentContentRepository documentContentRepository,
+            AngelosService angelosService
+    ) {
         this.studyProgramRepository = studyProgramRepository;
         this.organisationRepository = organisationRepository;
         this.organisationService = organisationService;
+        this.sampleQuestionRepository = sampleQuestionRepository;
+        this.websiteContentRepository = websiteContentRepository;
+        this.documentContentRepository = documentContentRepository;
+        this.angelosService = angelosService;
     }
 
     public List<StudyProgramDTO> getAllStudyProgramsByOrgId(Long orgId) {
@@ -95,6 +118,72 @@ public class StudyProgramService {
         return studyProgramRepository.findByName(name);
     }
 
+    @Transactional
+    public void deleteStudyProgram(Long id, Long orgId) {
+        StudyProgram studyProgram = studyProgramRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Study program not found with id " + id));
+
+        Organisation organisation = organisationService.getOrganisationById(orgId);
+
+        // Ensure user has permission to delete the program
+        if (!studyProgram.getOrganisation().getOrgID().equals(orgId)
+                && !"System Organisation".equals(organisation.getName())) {
+            throw new UnauthorizedException("You are not authorized to delete this study program.");
+        }
+
+        // Update resources
+        List<WebsiteContent> websitesToUpdate = websiteContentRepository.findByStudyProgramsContains(studyProgram)
+                .stream()
+                .filter(w -> w.getStudyPrograms().size() > 1)
+                .toList();
+         List<SampleQuestion> questionsToUpdate = sampleQuestionRepository.findByStudyProgramsContains(studyProgram)
+                .stream()
+                .filter(q -> q.getStudyPrograms().size() > 1)
+                .toList();
+        List<DocumentContent> documentsToUpdate = documentContentRepository.findByStudyProgramsContains(studyProgram)
+                .stream()
+                .filter(d -> d.getStudyPrograms().size() > 1)
+                .toList();
+        
+        // Remove study program reference
+        for (WebsiteContent website : websitesToUpdate) {
+            website.getStudyPrograms().remove(studyProgram);
+            websiteContentRepository.save(website);
+        }
+        for (SampleQuestion question : questionsToUpdate) {
+            question.getStudyPrograms().remove(studyProgram);
+            sampleQuestionRepository.save(question);
+        }
+        for (DocumentContent document : documentsToUpdate) {
+            document.getStudyPrograms().remove(studyProgram);
+            documentContentRepository.save(document);
+        }
+
+        // Delete resources
+        List<WebsiteContent> websitesToDelete = websiteContentRepository.findByStudyProgramsContainsOnly(studyProgram);
+        List<SampleQuestion> questionsToDelete = sampleQuestionRepository.findByStudyProgramsContainsOnly(studyProgram);
+        List<DocumentContent> documentsToDelete = documentContentRepository.findByStudyProgramsContainsOnly(studyProgram);
+
+        websiteContentRepository.deleteAll(websitesToDelete);
+        sampleQuestionRepository.deleteAll(questionsToDelete);
+        documentContentRepository.deleteAll(documentsToDelete);
+
+        studyProgramRepository.delete(studyProgram);
+        
+        // Make Angelos requests at the end to make sure that changes are reverted in case of failure
+        boolean success = angelosService.sendWebsiteBatchDeleteRequest(websitesToDelete.stream().map(w -> w.getId().toString()).toList());
+        if (!success) {
+            throw new RuntimeException("Failed to batch delete websites from Angelos RAG system.");
+        }
+        success = angelosService.sendSampleQuestionBatchDeleteRequest(questionsToDelete.stream().map(w -> w.getSqID().toString()).toList());
+        if (!success) {
+            throw new RuntimeException("Failed to batch delete sample questions from Angelos RAG system.");
+        }
+        success = angelosService.sendDocumentBatchDeleteRequest(documentsToDelete.stream().map(w -> w.getDocID().toString()).toList());
+        if (!success) {
+            throw new RuntimeException("Failed to batch delete documents from Angelos RAG system.");
+        }
+    }
     /**
      * Fetch a list of StudyPrograms by their IDs.
      * 

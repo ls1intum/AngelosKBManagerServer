@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ase.angelos_kb_backend.dto.UserDTO;
+import com.ase.angelos_kb_backend.dto.UserDetailsDTO;
 import com.ase.angelos_kb_backend.exception.ResourceNotFoundException;
 import com.ase.angelos_kb_backend.exception.UnauthorizedException;
 import com.ase.angelos_kb_backend.model.Organisation;
@@ -52,6 +53,20 @@ public class UserService {
             .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + mail));
     }
 
+    public UserDetailsDTO findMe(String mail) {
+        User user = userRepository.findByMail(mail).orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + mail));
+        
+        UserDetailsDTO userDetails = new UserDetailsDTO();
+        userDetails.setId(user.getUserID());
+        userDetails.setMail(user.getMail());
+        userDetails.setAdmin(user.isAdmin());
+        userDetails.setSystemAdmin(user.isSystemAdmin());
+        userDetails.setApproved(user.isApproved());
+        userDetails.setOrganisationName(user.getOrganisation().getName());
+        
+        return userDetails;
+    }
+
     @Transactional
     public UserDTO approveUser(Long userId, Long orgId) {
         User user = userRepository.findById(userId)
@@ -78,6 +93,22 @@ public class UserService {
         }
 
         user.setAdmin(true);
+        User updatedUser = userRepository.save(user);
+        return convertToDto(updatedUser);
+    }
+
+    @Transactional
+    public UserDTO removeUser(Long userId, Long orgId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id " + userId));
+        
+        Organisation approverOrg = organisationService.getOrganisationById(orgId);
+        // Allow operation if the approver's organisation is "System Organisation" or matches the user's organisation
+        if (!user.getOrganisation().getOrgID().equals(orgId) && !"System Organisation".equals(approverOrg.getName())) {
+            throw new UnauthorizedException("You are not authorized to make this user an administrator.");
+        }
+
+        user.setApproved(false);
         User updatedUser = userRepository.save(user);
         return convertToDto(updatedUser);
     }

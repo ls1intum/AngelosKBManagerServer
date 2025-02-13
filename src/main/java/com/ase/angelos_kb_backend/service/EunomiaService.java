@@ -8,22 +8,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import com.ase.angelos_kb_backend.dto.eunomnia.MailStatusDTO;
-import com.ase.angelos_kb_backend.dto.eunomnia.MailThreadRequestDTO;
+import com.ase.angelos_kb_backend.dto.eunomia.MailStatusDTO;
+import com.ase.angelos_kb_backend.dto.eunomia.MailThreadRequestDTO;
 import com.ase.angelos_kb_backend.util.MailStatus;
 
 @Component
-public class EunomniaService {
+public class EunomiaService {
     
-    @Value("${eunomnia.url}")
-    private String eunomniaUrl;
+    @Value("${eunomia.url}")
+    private String eunomiaUrl;
 
-    @Value("${eunomnia.secret}")
-    private String eunomniaApiKey;
+    @Value("${eunomia.secret}")
+    private String eunomiaApiKey;
 
     private final RestTemplate restTemplate;
 
-    public EunomniaService() {
+    public EunomiaService() {
         this.restTemplate = new RestTemplate();
     }
 
@@ -34,11 +34,11 @@ public class EunomniaService {
      * @return MailStatusDTO with the pipeline's status
      */
     public MailStatusDTO getStatus(Long orgId) {
-        String endpoint = eunomniaUrl + "/mail/" + orgId + "/status";
+        String endpoint = eunomiaUrl + "/mail/" + orgId + "/status";
         
         try {
             HttpHeaders headers = new HttpHeaders();
-            headers.set("x-api-key", eunomniaApiKey);
+            headers.set("x-api-key", eunomiaApiKey);
             HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
             ResponseEntity<MailStatusDTO> response = restTemplate.exchange(
@@ -66,11 +66,11 @@ public class EunomniaService {
      * @return true if the thread starts successfully, false otherwise
      */
     public boolean startThread(Long orgId, MailThreadRequestDTO credentials) {
-        String endpoint = eunomniaUrl + "/mail/" + orgId + "/start";
+        String endpoint = eunomiaUrl + "/mail/" + orgId + "/start";
 
         try {
             HttpHeaders headers = new HttpHeaders();
-            headers.set("x-api-key", eunomniaApiKey);
+            headers.set("x-api-key", eunomiaApiKey);
             HttpEntity<MailThreadRequestDTO> requestEntity = new HttpEntity<>(credentials, headers);
 
             ResponseEntity<Void> response = restTemplate.postForEntity(endpoint, requestEntity, Void.class);
@@ -88,11 +88,11 @@ public class EunomniaService {
      * @return true if the thread stops successfully, false otherwise
      */
     public boolean stopThread(Long orgId) {
-        String endpoint = eunomniaUrl + "/mail/" + orgId + "/stop";
+        String endpoint = eunomiaUrl + "/mail/" + orgId + "/stop";
 
         try {
             HttpHeaders headers = new HttpHeaders();
-            headers.set("x-api-key", eunomniaApiKey);
+            headers.set("x-api-key", eunomiaApiKey);
             HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
             ResponseEntity<Void> response = restTemplate.exchange(
@@ -110,12 +110,12 @@ public class EunomniaService {
     }
 
     /**
-     * Helper method to validate the API key for Eunomnia calls.
+     * Helper method to validate the API key for Eunomia calls.
      *
      * @param apiKey The API key to validate
      * @return true if valid, false otherwise
      */
     public boolean verifyAPIKey(String apiKey) {
-        return eunomniaApiKey.equals(apiKey);
+        return eunomiaApiKey.equals(apiKey);
     }
 }

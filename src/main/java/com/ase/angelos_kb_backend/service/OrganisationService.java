@@ -1,12 +1,13 @@
 package com.ase.angelos_kb_backend.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
 import com.ase.angelos_kb_backend.dto.OrganisationDTO;
-import com.ase.angelos_kb_backend.dto.eunomnia.MailCredentialsDTO;
+import com.ase.angelos_kb_backend.dto.eunomia.MailCredentialsDTO;
 import com.ase.angelos_kb_backend.exception.ResourceNotFoundException;
 import com.ase.angelos_kb_backend.model.Organisation;
 import com.ase.angelos_kb_backend.repository.OrganisationRepository;
@@ -32,6 +33,18 @@ public class OrganisationService {
 
         Organisation savedOrganisation = organisationRepository.save(organisation);
         return convertToDto(savedOrganisation);
+    }
+    public OrganisationDTO updateOrganisation(Long id, OrganisationDTO updatedOrganisation) {
+        Optional<Organisation> optionalOrg = organisationRepository.findById(id);
+        if(optionalOrg.isEmpty()) {
+            return null;
+        }
+        Organisation existingOrg = optionalOrg.get();
+        if (updatedOrganisation.getName() != null) {
+            existingOrg.setName(updatedOrganisation.getName());
+        }
+        Organisation savedOrg = organisationRepository.save(existingOrg);
+        return convertToDto(savedOrg);
     }
 
     public boolean removeOrganisation(Long orgId) {

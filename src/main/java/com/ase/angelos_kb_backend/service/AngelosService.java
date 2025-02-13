@@ -7,6 +7,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -21,7 +22,7 @@ import com.ase.angelos_kb_backend.dto.angelos.AngelosEditDocumentRequest;
 import com.ase.angelos_kb_backend.dto.angelos.AngelosEditSampleQuestionRequest;
 import com.ase.angelos_kb_backend.dto.angelos.AngelosEditWebsiteRequest;
 import com.ase.angelos_kb_backend.dto.angelos.AngelosRefreshContentRequest;
-import com.ase.angelos_kb_backend.dto.eunomnia.MailResponseRequestDTO;
+import com.ase.angelos_kb_backend.dto.eunomia.MailResponseRequestDTO;
 
 @Component
 public class AngelosService {
@@ -124,7 +125,16 @@ public class AngelosService {
      */
     public boolean sendWebsiteDeleteRequest(String id) {
         String endpoint = angelosUrl + "/knowledge/website/" + id + "/delete";
-        return sendDeleteRequest(endpoint);
+        return sendDeleteRequest(endpoint, null);
+    }
+
+    /**
+     * Send a request to batch delete websites from Angelos.
+     */
+    public boolean sendWebsiteBatchDeleteRequest(List<String> ids) {
+        if (ids.size() == 0) return true;
+        String endpoint = angelosUrl + "/knowledge/website/deleteBatch";
+        return sendDeleteRequest(endpoint, ids);
     }
 
     /**
@@ -171,7 +181,16 @@ public class AngelosService {
      */
     public boolean sendDocumentDeleteRequest(String id) {
         String endpoint = angelosUrl + "/knowledge/document/" + id + "/delete";
-        return sendDeleteRequest(endpoint);
+        return sendDeleteRequest(endpoint, null);
+    }
+
+    /**
+     * Send a request to batch delete document resources.
+     */
+    public boolean sendDocumentBatchDeleteRequest(List<String> ids) {
+        if (ids.size() == 0) return true;
+        String endpoint = angelosUrl + "/knowledge/document/deleteBatch";
+        return sendDeleteRequest(endpoint, ids);
     }
 
     /**
@@ -218,8 +237,18 @@ public class AngelosService {
      */
     public boolean sendSampleQuestionDeleteRequest(String id) {
         String endpoint = angelosUrl + "/knowledge/sample-question/" + id + "/delete";
-        return sendDeleteRequest(endpoint);
+        return sendDeleteRequest(endpoint, null);
     }
+
+    /**
+     * Send a request to batch delete sample question resources.
+     */
+    public boolean sendSampleQuestionBatchDeleteRequest(List<String> ids) {
+        if (ids.size() == 0) return true;
+        String endpoint = angelosUrl + "/knowledge/sample-question/deleteBatch";
+        return sendDeleteRequest(endpoint, ids);
+    }
+
 
     /**
      * Helper method to send POST requests and return boolean based on success.
@@ -233,22 +262,22 @@ public class AngelosService {
             
             return response.getStatusCode().is2xxSuccessful();
         } catch (Exception e) {
+            System.err.println("Error sending request: " + e.getMessage());
             return false;
         }
     }
 
-
     /**
-     * Helper method to send DELETE requests and return boolean based on success.
+     * Helper method to send DELETE requests with an optional body.
      */
-    private boolean sendDeleteRequest(String endpoint) {
+    private boolean sendDeleteRequest(String endpoint, @Nullable Object body) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.set("x-api-key", angelosSecret);
-            HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+            
+            HttpEntity<Object> requestEntity = (body != null) ? new HttpEntity<>(body, headers) : new HttpEntity<>(headers);
 
             restTemplate.exchange(endpoint, HttpMethod.DELETE, requestEntity, Void.class);
-            // If delete doesn't throw an exception, we consider it successful
             return true;
         } catch (Exception e) {
             return false;

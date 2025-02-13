@@ -15,13 +15,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.ase.angelos_kb_backend.dto.angelos.AngelosChatResponse;
-import com.ase.angelos_kb_backend.dto.eunomnia.MailCredentialsDTO;
-import com.ase.angelos_kb_backend.dto.eunomnia.MailCredentialsResponseDTO;
-import com.ase.angelos_kb_backend.dto.eunomnia.MailResponseRequestDTO;
-import com.ase.angelos_kb_backend.dto.eunomnia.MailStatusDTO;
-import com.ase.angelos_kb_backend.dto.eunomnia.MailThreadRequestDTO;
+import com.ase.angelos_kb_backend.dto.eunomia.MailCredentialsDTO;
+import com.ase.angelos_kb_backend.dto.eunomia.MailCredentialsResponseDTO;
+import com.ase.angelos_kb_backend.dto.eunomia.MailResponseRequestDTO;
+import com.ase.angelos_kb_backend.dto.eunomia.MailStatusDTO;
+import com.ase.angelos_kb_backend.dto.eunomia.MailThreadRequestDTO;
 import com.ase.angelos_kb_backend.service.AngelosService;
-import com.ase.angelos_kb_backend.service.EunomniaService;
+import com.ase.angelos_kb_backend.service.EunomiaService;
 import com.ase.angelos_kb_backend.service.OrganisationService;
 import com.ase.angelos_kb_backend.service.StudyProgramService;
 import com.ase.angelos_kb_backend.util.JwtUtil;
@@ -35,17 +35,17 @@ public class MailController {
     private final OrganisationService organisationService;
     private final StudyProgramService studyProgramService;
     private final JwtUtil jwtUtil;
-    private final EunomniaService eunomniaService;
+    private final EunomiaService eunomiaService;
     private final AngelosService angelosService;
 
     @Value("${app.max-message-length}")
     private int maxMessageLength;
 
-    public MailController(OrganisationService organisationService, StudyProgramService studyProgramService, JwtUtil jwtUtil, EunomniaService eunomniaService, AngelosService angelosService) {
+    public MailController(OrganisationService organisationService, StudyProgramService studyProgramService, JwtUtil jwtUtil, EunomiaService eunomiaService, AngelosService angelosService) {
         this.jwtUtil = jwtUtil;
         this.organisationService = organisationService;
         this.studyProgramService = studyProgramService;
-        this.eunomniaService = eunomniaService;
+        this.eunomiaService = eunomiaService;
         this.angelosService = angelosService;
     }
 
@@ -71,7 +71,7 @@ public class MailController {
             List<String> studyPrograms = studyProgramService.getAllStudyProgramsByOrgId(orgId).stream().map(sp -> sp.getName()).toList();
             dto.setStudyPrograms(studyPrograms);
 
-            success = eunomniaService.startThread(orgId, dto);
+            success = eunomiaService.startThread(orgId, dto);
         }
 
         if (success) {
@@ -103,7 +103,7 @@ public class MailController {
     @PostMapping("/deactivate")
     public ResponseEntity<Void> deactivate(@RequestHeader("Authorization") String token) {
         Long orgId = jwtUtil.extractOrgId(token.replace("Bearer ", ""));
-        boolean success = eunomniaService.stopThread(orgId);
+        boolean success = eunomiaService.stopThread(orgId);
         if (success) {
             organisationService.setMailStatus(orgId, MailStatus.INACTIVE);
             return ResponseEntity.ok().build();
@@ -121,7 +121,7 @@ public class MailController {
         Long orgId = jwtUtil.extractOrgId(token.replace("Bearer ", ""));
 
         MailStatusDTO statusDto = new MailStatusDTO();
-        MailStatus status = eunomniaService.getStatus(orgId).getStatus();
+        MailStatus status = eunomiaService.getStatus(orgId).getStatus();
 
         statusDto.setStatus(status);
         organisationService.setMailStatus(orgId, status);
@@ -137,7 +137,7 @@ public class MailController {
             @RequestHeader("x-api-key") String apiKey,
             @RequestBody MailResponseRequestDTO request) {
 
-        if (eunomniaService.verifyAPIKey(apiKey)) {
+        if (eunomiaService.verifyAPIKey(apiKey)) {
             if (request.getMessage() != null && request.getMessage().length() > maxMessageLength) {
                 throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,

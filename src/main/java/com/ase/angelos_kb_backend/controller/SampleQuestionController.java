@@ -3,6 +3,7 @@ package com.ase.angelos_kb_backend.controller;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,10 +50,17 @@ public class SampleQuestionController {
     public ResponseEntity<SampleQuestionDTO> addSampleQuestion(
             @RequestHeader("Authorization") String token,
             @Valid @RequestBody SampleQuestionDTO sampleQuestionDTO) {
-
-        Long orgId = jwtUtil.extractOrgId(token.replace("Bearer ", ""));
-        SampleQuestionDTO responseDTO = sampleQuestionService.addSampleQuestion(orgId, sampleQuestionDTO);
-        return ResponseEntity.ok(responseDTO);
+        try {
+            System.out.println("addSampleQuestion");
+            Long orgId = jwtUtil.extractOrgId(token.replace("Bearer ", ""));
+            SampleQuestionDTO responseDTO = sampleQuestionService.addSampleQuestion(orgId, sampleQuestionDTO);
+            System.out.println("added sample question");
+            return ResponseEntity.ok(responseDTO);
+        } catch (Exception e) {
+            System.err.println("Error adding sample question: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null); // Adjust response as necessary for your API's design
+        }
     }
 
     /**
