@@ -24,12 +24,14 @@ public class JwtUtil {
 
     // Generate JWT Token
     public String generateToken(String email, Long orgId, boolean isSystemAdmin) {
+        // 15 minutes
+        long ACCESS_TOKEN_EXPIRATION = 15 * 60 * 1000;
         return Jwts.builder()
                 .setSubject(email)
                 .claim("orgId", orgId) // Include organisation ID in the token
                 .claim("isSystemAdmin", isSystemAdmin)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 hours
+                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
                 .signWith(signingKey, SignatureAlgorithm.HS256)
                 .compact();
     }

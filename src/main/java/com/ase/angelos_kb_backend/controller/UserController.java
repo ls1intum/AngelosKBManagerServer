@@ -3,6 +3,7 @@ package com.ase.angelos_kb_backend.controller;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -38,6 +39,10 @@ public class UserController {
     private final UserDetailsService userDetailsService;
     private final AuthenticationService authenticationService;
     private final JwtUtil jwtUtil;
+    @Value("${app.cookie.secure}")
+    private boolean secureCookie;
+
+
 
     public UserController(UserService userService, UserDetailsService userDetailsService, AuthenticationService authenticationService, JwtUtil jwtUtil) {
         this.userService = userService;
@@ -116,7 +121,7 @@ public class UserController {
         // The response may contain the access token in the body and the refresh token as a cookie
         HttpCookie refreshCookie = ResponseCookie.from("refreshToken", tokens.get("refreshToken"))
             .httpOnly(true)
-            .secure(false) // TODO: Change this when deployed
+            .secure(secureCookie)
             .sameSite("Lax") // For cross-site requests, None is required when sending cookies
             .path("/")
             .maxAge(7 * 24 * 60 * 60) // Refresh token expiry, say one week
@@ -158,7 +163,7 @@ public class UserController {
         // Create a cookie with the same name and attributes but zero max-age to remove it
         HttpCookie invalidCookie = ResponseCookie.from("refreshToken", "")
             .httpOnly(true)
-            .secure(true)
+            .secure(secureCookie)
             .sameSite("Strict")
             .path("/")
             .maxAge(0) // Invalidate the cookie immediately
