@@ -63,6 +63,7 @@ public class UserService {
         userDetails.setSystemAdmin(user.isSystemAdmin());
         userDetails.setApproved(user.isApproved());
         userDetails.setOrganisationName(user.getOrganisation().getName());
+        userDetails.setOrganisationActive(Boolean.TRUE.equals(user.getOrganisation().getResponseActive()));
         
         return userDetails;
     }
