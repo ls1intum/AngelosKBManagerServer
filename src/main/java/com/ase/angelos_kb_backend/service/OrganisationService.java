@@ -97,23 +97,15 @@ public class OrganisationService {
         return result;
     }
 
-    @CacheEvict(value = "orgResponseActive", key = "#orgId")
-    public OrganisationDTO setResponseActive(Long orgId, boolean active) {
+    public boolean setMailActive(Long orgId, boolean active) {
+        // TODO: Pause Eunomia and reactivate
         Optional<Organisation> optionalOrg = organisationRepository.findById(orgId);
         if (optionalOrg.isEmpty()) {
-            return null;
+            throw new RuntimeException();
         }
-        boolean success = true;
-        if (! active) {
-            success = this.eunomiaService.stopThread(orgId);
-        }
-
+        boolean success = this.eunomiaService.stopThread(orgId);
         if (success) {
-            Organisation org = optionalOrg.get();
-            org.setResponseActive(active);
-        
-            Organisation saved = organisationRepository.save(org);
-            return convertToDto(saved);
+            return true;
         } else {
             throw new RuntimeException();
         }
@@ -124,6 +116,20 @@ public class OrganisationService {
         return organisationRepository.findById(orgId)
                 .map(Organisation::getResponseActive)
                 .orElse(false);
+    }
+
+    @CacheEvict(value = "orgResponseActive", key = "#orgId")
+    public OrganisationDTO setResponseActive(Long orgId, boolean active) {
+        Optional<Organisation> optionalOrg = organisationRepository.findById(orgId);
+        if (optionalOrg.isEmpty()) {
+            return null;
+        }
+
+        Organisation org = optionalOrg.get();
+        org.setResponseActive(active);
+    
+        Organisation saved = organisationRepository.save(org);
+        return convertToDto(saved);
     }
 
     private OrganisationDTO convertToDto(Organisation organisation) {

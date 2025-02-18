@@ -90,8 +90,8 @@ public class OrganisationController {
         }
     }
 
-    @PutMapping("/responseActive")
-    public ResponseEntity<OrganisationDTO> setResponseActive(
+    @PutMapping("/chatActive")
+    public ResponseEntity<OrganisationDTO> setChatStatus(
             @RequestHeader("Authorization") String token,
             @RequestParam boolean active) {
 
@@ -102,5 +102,18 @@ public class OrganisationController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
         return ResponseEntity.ok(updatedOrg);
+    }
+
+    @PutMapping("/mailActive")
+    public ResponseEntity<OrganisationDTO> setMailStatus(
+            @RequestHeader("Authorization") String token,
+            @RequestParam boolean active) {
+        Long orgId = jwtUtil.extractOrgId(token.replace("Bearer ", ""));
+        boolean success = organisationService.setMailActive(orgId, active);
+
+        if (! success) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.ok().build();
     }
 }
