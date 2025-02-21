@@ -10,6 +10,7 @@ import com.ase.angelos_kb_backend.dto.angelos.AngelosChatMessage;
 import com.ase.angelos_kb_backend.dto.angelos.AngelosChatRequest;
 import com.ase.angelos_kb_backend.dto.angelos.AngelosChatResponse;
 import com.ase.angelos_kb_backend.service.AngelosService;
+import com.ase.angelos_kb_backend.service.OrganisationService;
 import com.ase.angelos_kb_backend.service.StudyProgramService;
 import com.ase.angelos_kb_backend.util.JwtUtil;
 
@@ -36,6 +37,7 @@ public class ChatController {
     private final JwtUtil jwtUtil;
     private final AngelosService angelosService;
     private final StudyProgramService studyProgramService;
+    private final OrganisationService organisationService;
 
     @Value("${angelos.username}")
     private String angelosUsername;
@@ -46,10 +48,11 @@ public class ChatController {
     @Value("${app.max-message-length}")
     private int maxMessageLength;
 
-    public ChatController(JwtUtil jwtUtil, AngelosService angelosService, StudyProgramService studyProgramService) {
+    public ChatController(JwtUtil jwtUtil, AngelosService angelosService, StudyProgramService studyProgramService, OrganisationService organisationService) {
         this.jwtUtil = jwtUtil;
         this.angelosService = angelosService;
         this.studyProgramService = studyProgramService;
+        this.organisationService = organisationService;
     }
 
     /**
@@ -62,6 +65,11 @@ public class ChatController {
             @RequestParam(defaultValue = "false") boolean filterByOrg) {
         token = token.replace("Bearer ", "");
         if (jwtUtil.extractEmail(token).equals(angelosUsername) && jwtUtil.extractChatPassword(token).equals(angelosPassword)) {
+            Long orgId = request.getOrgId();
+            if (orgId != null && ! this.organisationService.isResponseActive(orgId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+            
             // Validate messages and last message length
             if (request.getMessages() == null || request.getMessages().isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No messages have been provided.");

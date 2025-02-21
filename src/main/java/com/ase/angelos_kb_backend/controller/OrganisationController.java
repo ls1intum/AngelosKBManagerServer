@@ -5,7 +5,6 @@ import com.ase.angelos_kb_backend.service.OrganisationService;
 import com.ase.angelos_kb_backend.util.JwtUtil;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
@@ -89,5 +88,32 @@ public class OrganisationController {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Organisation not found.");
         }
+    }
+
+    @PutMapping("/chatActive")
+    public ResponseEntity<OrganisationDTO> setChatStatus(
+            @RequestHeader("Authorization") String token,
+            @RequestParam boolean active) {
+
+        Long orgId = jwtUtil.extractOrgId(token.replace("Bearer ", ""));
+        OrganisationDTO updatedOrg = organisationService.setResponseActive(orgId, active);
+
+        if (updatedOrg == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.ok(updatedOrg);
+    }
+
+    @PutMapping("/mailActive")
+    public ResponseEntity<OrganisationDTO> setMailStatus(
+            @RequestHeader("Authorization") String token,
+            @RequestParam boolean active) {
+        Long orgId = jwtUtil.extractOrgId(token.replace("Bearer ", ""));
+        boolean success = organisationService.setMailActive(orgId, active);
+
+        if (! success) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.ok().build();
     }
 }

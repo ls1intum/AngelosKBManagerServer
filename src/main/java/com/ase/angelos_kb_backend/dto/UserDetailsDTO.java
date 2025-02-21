@@ -16,4 +16,5 @@ public class UserDetailsDTO extends UserDTO {
     private String organisationName;
     @JsonProperty("isSystemAdmin")
     private boolean isSystemAdmin;
+    private boolean organisationActive;
 }
